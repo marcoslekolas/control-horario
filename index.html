@@ -3,37 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario Profesional</title>
+  <title>Control Horario</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- ExcelJS para Excel con bordes y formato -->
+  <!-- ExcelJS desde CDN oficial -->
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <!-- html2pdf para exportar a PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-  <div class="container">
+  <!-- Pantalla de carga -->
+  <div id="loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;font-size:1.2em;">
+    ⏳ Cargando sistema...<br><small style="color:#666;margin-top:10px;">Si tarda más de 5s, desactiva bloqueadores de anuncios</small>
+  </div>
+  
+  <!-- Caja de errores visible -->
+  <div id="error-box" style="display:none;background:#fee2e2;color:#b91c1c;padding:20px;margin:20px;border-radius:8px;text-align:center;border:2px solid #fca5a5;"></div>
+
+  <!-- App principal -->
+  <div class="container" id="app-container" style="display:none;">
     <header class="header">
       <h1>📋 Control Horario Laboral</h1>
       <p class="subtitle">Art. 34.9 ET - RDL 8/2019</p>
-      <div id="status-msg" style="background:#e8f5e9; color:#2e7d32; padding:8px; border-radius:6px; font-size:0.9em; text-align:center; margin-top:10px; display:none;"></div>
     </header>
 
     <section class="config-section">
       <h2>Datos Empresa / Trabajador</h2>
       <div class="form-grid">
-        <div class="form-group"><label>Empresa:</label><input type="text" id="empresa" placeholder="ALGECIRAS LOGISTIC SOLUTIONS"></div>
-        <div class="form-group"><label>CIF:</label><input type="text" id="cif" placeholder="B12345678"></div>
-        <div class="form-group"><label>CCC:</label><input type="text" id="ccc" placeholder="12/12345678/90"></div>
-        <div class="form-group"><label>Trabajador:</label><input type="text" id="trabajador" placeholder="NOMBRE COMPLETO"></div>
-        <div class="form-group"><label>NIF:</label><input type="text" id="nif" placeholder="12345678A"></div>
-        <div class="form-group"><label>NAF:</label><input type="text" id="naf" placeholder="1234"></div>
+        <div class="form-group"><label>Empresa:</label><input type="text" id="empresa"></div>
+        <div class="form-group"><label>CIF:</label><input type="text" id="cif"></div>
+        <div class="form-group"><label>CCC:</label><input type="text" id="ccc"></div>
+        <div class="form-group"><label>Trabajador:</label><input type="text" id="trabajador"></div>
+        <div class="form-group"><label>NIF:</label><input type="text" id="nif"></div>
+        <div class="form-group"><label>NAF:</label><input type="text" id="naf"></div>
       </div>
-      <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-        <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Configuración</button>
-        <label style="font-weight:600; margin-left:auto;">Tipo Jornada:
-          <select id="tipoJornada" style="padding:8px; border-radius:6px; border:1px solid #ccc; margin-left:5px;">
-            <option value="partido">🔄 Partido (9-14 / 16-18) → 8h</option>
-            <option value="continuo">⏱️ Continuo (8-15) → 7h</option>
+      <div style="margin-top:15px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Config</button>
+        <label style="font-weight:600;">Tipo Jornada:
+          <select id="tipoJornada" style="padding:8px;border-radius:6px;border:1px solid #ccc;margin-left:5px;">
+            <option value="partido">Partido (9-14 / 16-18)</option>
+            <option value="continuo">Continuo (8-15)</option>
           </select>
         </label>
       </div>
@@ -45,47 +51,26 @@
         <h2 id="mesActual">CARGANDO...</h2>
         <button id="btnNext" class="btn-nav">Siguiente ▶</button>
       </div>
-
       <div class="table-container">
         <table id="tablaJornada">
-          <thead>
-            <tr>
-              <th>DÍA</th><th>ENTRADA M.</th><th>SALIDA M.</th><th>ENTRADA T.</th><th>SALIDA T.</th>
-              <th>TOTAL H.</th><th>EXTRAS</th><th>COMPL.</th><th>OBSERVACIONES</th>
-            </tr>
-          </thead>
+          <thead><tr><th>DÍA</th><th>ENTRADA M.</th><th>SALIDA M.</th><th>ENTRADA T.</th><th>SALIDA T.</th><th>TOTAL H.</th><th>EXTRAS</th><th>COMPL.</th><th>OBSERVACIONES</th></tr></thead>
           <tbody id="tbodyCalendario"></tbody>
-          <tfoot>
-            <tr class="total-row">
-              <td>TOTAL MES</td><td colspan="4"></td>
-              <td><strong id="totalHorasMes">0</strong></td>
-              <td><strong id="totalExtras">0</strong></td>
-              <td><strong id="totalComplem">0</strong></td>
-              <td></td>
-            </tr>
-          </tfoot>
+          <tfoot><tr class="total-row"><td>TOTAL MES</td><td colspan="4"></td><td><strong id="totalHorasMes">0</strong></td><td><strong id="totalExtras">0</strong></td><td><strong id="totalComplem">0</strong></td><td></td></tr></tfoot>
         </table>
       </div>
     </section>
 
     <section class="actions-section">
-      <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar Mes</button>
+      <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar</button>
       <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos</button>
       <button id="btnExcel" class="btn btn-primary">📊 Excel con Bordes</button>
-      <button id="btnPDF" class="btn btn-info">📄 Generar PDF</button>
       <button id="btnBackup" class="btn btn-secondary">📥 Backup</button>
       <button id="btnRestore" class="btn btn-secondary">📤 Restaurar</button>
       <input type="file" id="fileRestore" accept=".json" style="display:none;">
     </section>
 
-    <footer class="legal-footer">
-      <p>Registro realizado en cumplimiento del Art. 34.9 del RDL 2/2015 (mod. RDL 8/2019).</p>
-      <p>Conservación mínima: 4 años. Copia al trabajador junto con nómina.</p>
-    </footer>
+    <footer class="legal-footer"><p>Registro Art. 34.9 ET. Conservación mínima: 4 años.</p></footer>
   </div>
-
-  <!-- Contenedor oculto para PDF -->
-  <div id="pdf-render" style="position:absolute; left:-9999px; top:0;"></div>
 
   <script src="app.js"></script>
 </body>
