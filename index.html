@@ -87,12 +87,21 @@
     </section>
 
     <section class="actions-section">
-      <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos del Mes</button>
-      <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
-      <button id="btnBackup" class="btn btn-secondary">📥 Backup JSON</button>
-      <button id="btnRestore" class="btn btn-secondary">📤 Restaurar Backup</button>
-      <input type="file" id="fileRestore" accept=".json" style="display:none;">
-    </section>
+  <div class="actions-group">
+    <label for="tipoJornada" class="action-label">Tipo de Jornada:</label>
+    <select id="tipoJornada" class="select-jornada">
+      <option value="partido">🔄 Turno Partido (9-14 / 16-18) → 8h</option>
+      <option value="continuo">⏱️ Turno Continuo (8-15) → 7h</option>
+    </select>
+  </div>
+  
+  <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar Mes</button>
+  <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos</button>
+  <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
+  <button id="btnBackup" class="btn btn-secondary">📥 Backup</button>
+  <button id="btnRestore" class="btn btn-secondary">📤 Restaurar</button>
+  <input type="file" id="fileRestore" accept=".json" style="display:none;">
+</section>
 
     <footer class="legal-footer">
       <p><strong>Registro realizado en cumplimiento de la obligación establecida en el Art. 34.9 del Real Decreto Legislativo 2/2015 de 23 de Octubre</strong></p>
