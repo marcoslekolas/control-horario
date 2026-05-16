@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Verificar carga de ExcelJS
+  if (typeof ExcelJS === 'undefined') {
+    alert('⚠️ Error: No se ha cargado la librería ExcelJS. Comprueba tu conexión o recarga en modo incógnito.');
+    return;
+  }
+
   let mesActual = new Date().getMonth();
   let anioActual = new Date().getFullYear();
   let datos = JSON.parse(localStorage.getItem('horario_datos') || '{}');
@@ -169,9 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const wb = new ExcelJS.Workbook();
       wb.creator = 'Control Horario';
       const borderThin = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-      const headerStyle = { font: { bold: true, size: 10 }, alignment: { horizontal: 'center', vertical: 'middle' }, border: borderThin, fill: { fgColor: { argb: 'FFF1F5F9' } } };
+      const headerStyle = { font: { bold: true, size: 10, name: 'Calibri' }, alignment: { horizontal: 'center', vertical: 'middle' }, border: borderThin, fill: { fgColor: { argb: 'FFF1F5F9' } } };
       const cellStyle = { border: borderThin, alignment: { horizontal: 'center', vertical: 'middle' } };
-      const labelStyle = { font: { bold: true, size: 10 }, border: { bottom: {style:'thin'} } };
+      const labelStyle = { font: { bold: true, size: 10, name: 'Calibri' }, border: { bottom: {style:'thin'} } };
 
       for (let mes = 0; mes < 12; mes++) {
         const ws = wb.addWorksheet(nombresMeses[mes]);
@@ -215,9 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const last = 8 + diasEnMes + 2;
-        ws.getCell(`A${last}`).value = 'Fdo. La Empresa'; ws.getCell(`A${last}`).font = { italic: true };
-        ws.getCell(`F${last}`).value = 'Fdo. Trabajador/a'; ws.getCell(`F${last}`).font = { italic: true };
-        ws.getCell(`J${last}`).value = `Total: ${totalHoras}h`; ws.getCell(`J${last}`).font = { bold: true };
+        ws.getCell(`A${last}`).value = 'Fdo. La Empresa'; ws.getCell(`A${last}`).font = { italic: true, name: 'Calibri' };
+        ws.getCell(`F${last}`).value = 'Fdo. Trabajador/a'; ws.getCell(`F${last}`).font = { italic: true, name: 'Calibri' };
+        ws.getCell(`J${last}`).value = `Total: ${totalHoras}h`; ws.getCell(`J${last}`).font = { bold: true, name: 'Calibri' };
 
         ws.columns = [
           { width: 7 }, { width: 11 }, { width: 12 }, { width: 11 }, { width: 12 },
@@ -232,7 +238,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const a = document.createElement('a'); a.href = url;
       a.download = `${anioActual}_CONTROL_HORARIO.xlsx`;
       a.click(); URL.revokeObjectURL(url);
-    } catch(e) { alert('Error generando Excel: ' + e.message); }
+    } catch(e) { 
+      console.error(e);
+      alert('Error generando Excel: ' + e.message); 
+    }
     finally { btn.textContent = '✅ Generar y Descargar'; btn.disabled = false; }
   }
 
