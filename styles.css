@@ -1,1 +1,13 @@
-
+:root { --bg: #f8f9fa; --card: #fff; --primary: #2563eb; --text: #1f2937; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+body { background: var(--bg); color: var(--text); padding: 1rem; max-width: 600px; margin: 0 auto; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+button { background: var(--primary); color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+button:hover { opacity: 0.9; }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+.presets button[data-clear] { background: #6b7280; grid-column: span 2; }
+.inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+.inputs input { padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; }
+#horas { background: #f3f4f6; }
+form button[type="submit"] { width: 100%; padding: 0.8rem; font-size: 1rem; margin-top: 0.5rem; }
+#status { margin-top: 1rem; text-align: center; font-weight: 500; min-height: 1.5rem; }
