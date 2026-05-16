@@ -53,18 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
         nif: document.getElementById('cfg-nif').value,
         naf: document.getElementById('cfg-naf').value
       };
-      guardarLocal();
-      actualizarInfoTrabajador();
-      modalConfig.close();
+      guardarLocal(); actualizarInfoTrabajador(); modalConfig.close();
     };
 
     document.getElementById('btn-cancelar').onclick = () => modalConfig.close();
     document.getElementById('btn-cancelar-gen').onclick = () => modalGenerar.close();
-
     document.getElementById('btn-export').onclick = exportarBackup;
     document.getElementById('btn-import').onclick = () => fileImport.click();
     fileImport.onchange = importarBackup;
-
     document.getElementById('btn-generar-anual').onclick = () => {
       document.getElementById('anio-generar').textContent = anioActual;
       modalGenerar.showModal();
@@ -84,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderizarMes() {
     mesLabel.textContent = `${nombresMeses[mesActual]} ${anioActual}`;
     tbody.innerHTML = '';
-
     const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
     const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
     datos[claveMes] = datos[claveMes] || {};
@@ -93,27 +88,23 @@ document.addEventListener('DOMContentLoaded', () => {
       const fecha = new Date(anioActual, mesActual, d);
       const diaSem = fecha.getDay();
       const claveDia = String(d).padStart(2,'0');
-
       if (!datos[claveMes][claveDia]) {
         datos[claveMes][claveDia] = (diaSem >= 1 && diaSem <= 5) ? { ...presetHorarios.completa } : { ...presetHorarios.libre };
       }
       const reg = datos[claveMes][claveDia];
-
       const tr = document.createElement('tr');
       tr.className = reg.obs?.includes('FESTIVO') ? 'festivo' : reg.obs?.includes('VACACIONES') ? 'vacaciones' : ((diaSem === 0 || diaSem === 6) && reg.horas > 0) ? 'guardia' : '';
 
       tr.innerHTML = `
         <td><strong>${d}</strong><br><small>${diasSemana[diaSem]}</small></td>
-        <td>
-          <select data-accion="tipo" data-dia="${d}">
-            <option value="completa" ${reg.horas===8 && reg.et?'selected':''}>8h (9-14/16-18)</option>
-            <option value="manana" ${reg.horas===5?'selected':''}>5h (9-14)</option>
-            <option value="ochoa15" ${reg.horas===7?'selected':''}>7h (8-15)</option>
-            <option value="festivo" ${reg.obs?.includes('FESTIVO')?'selected':''}>Festivo</option>
-            <option value="vacaciones" ${reg.obs?.includes('VACACIONES')?'selected':''}>Vacaciones</option>
-            <option value="libre" ${!reg.em && !reg.obs?'selected':''}>Libre</option>
-          </select>
-        </td>
+        <td><select data-accion="tipo" data-dia="${d}">
+          <option value="completa" ${reg.horas===8 && reg.et?'selected':''}>8h (9-14/16-18)</option>
+          <option value="manana" ${reg.horas===5?'selected':''}>5h (9-14)</option>
+          <option value="ochoa15" ${reg.horas===7?'selected':''}>7h (8-15)</option>
+          <option value="festivo" ${reg.obs?.includes('FESTIVO')?'selected':''}>Festivo</option>
+          <option value="vacaciones" ${reg.obs?.includes('VACACIONES')?'selected':''}>Vacaciones</option>
+          <option value="libre" ${!reg.em && !reg.obs?'selected':''}>Libre</option>
+        </select></td>
         <td><input type="time" value="${reg.em||''}" data-accion="hora" data-dia="${d}" data-campo="em"></td>
         <td><input type="time" value="${reg.sm||''}" data-accion="hora" data-dia="${d}" data-campo="sm"></td>
         <td><input type="time" value="${reg.et||''}" data-accion="hora" data-dia="${d}" data-campo="et"></td>
@@ -123,106 +114,127 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       tbody.appendChild(tr);
     }
-    guardarLocal();
-    adjuntarEventosTabla();
+    guardarLocal(); adjuntarEventosTabla();
   }
 
   function adjuntarEventosTabla() {
-    tbody.querySelectorAll('[data-accion="tipo"]').forEach(el => {
-      el.onchange = (e) => {
-        const dia = String(e.target.dataset.dia).padStart(2,'0');
-        const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
-        datos[claveMes][dia] = { ...presetHorarios[e.target.value] };
-        guardarLocal(); renderizarMes();
-      };
+    tbody.querySelectorAll('[data-accion="tipo"]').forEach(el => el.onchange = (e) => {
+      const dia = String(e.target.dataset.dia).padStart(2,'0');
+      const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
+      datos[claveMes][dia] = { ...presetHorarios[e.target.value] };
+      guardarLocal(); renderizarMes();
     });
-    tbody.querySelectorAll('[data-accion="hora"]').forEach(el => {
-      el.onchange = (e) => {
-        const dia = String(e.target.dataset.dia).padStart(2,'0');
-        const campo = e.target.dataset.campo;
-        const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
-        datos[claveMes][dia][campo] = e.target.value;
-        guardarLocal();
-      };
+    tbody.querySelectorAll('[data-accion="hora"]').forEach(el => el.onchange = (e) => {
+      const dia = String(e.target.dataset.dia).padStart(2,'0');
+      const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
+      datos[claveMes][dia][e.target.dataset.campo] = e.target.value;
+      guardarLocal();
     });
-    tbody.querySelectorAll('[data-accion="obs"]').forEach(el => {
-      el.onchange = (e) => {
-        const dia = String(e.target.dataset.dia).padStart(2,'0');
-        const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
-        datos[claveMes][dia].obs = e.target.value;
-        guardarLocal();
-      };
+    tbody.querySelectorAll('[data-accion="obs"]').forEach(el => el.onchange = (e) => {
+      const dia = String(e.target.dataset.dia).padStart(2,'0');
+      const claveMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}`;
+      datos[claveMes][dia].obs = e.target.value;
+      guardarLocal();
     });
   }
 
   function exportarBackup() {
-    try {
-      const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `backup_horario_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    } catch(e) { alert('Error al crear backup'); }
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = `backup_horario_${new Date().toISOString().split('T')[0]}.json`;
+    a.click(); URL.revokeObjectURL(url);
   }
 
   function importarBackup(e) {
-    const file = e.target.files[0];
-    if(!file) return;
+    const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
         const imported = JSON.parse(evt.target.result);
-        if(!imported.config) throw new Error('Falta configuración');
-        datos = imported;
-        config = datos.config || config;
-        guardarLocal();
-        actualizarInfoTrabajador();
-        renderizarMes();
+        if(!imported.config) throw new Error('Formato inválido');
+        datos = imported; config = datos.config || config;
+        guardarLocal(); actualizarInfoTrabajador(); renderizarMes();
         alert('✅ Datos restaurados correctamente');
       } catch(err) { alert('❌ Error al importar: ' + err.message); }
     };
-    reader.readAsText(file);
-    file.value = '';
+    reader.readAsText(file); file.value = '';
   }
 
-  function generarExcelAnual() {
+  async function generarExcelAnual() {
+    const btn = document.getElementById('btn-confirmar-gen');
+    btn.textContent = '⏳ Generando...'; btn.disabled = true;
+
     try {
-      const wb = XLSX.utils.book_new();
-      for(let mes=0; mes<12; mes++) {
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'Control Horario';
+      const borderThin = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+      const headerStyle = { font: { bold: true, size: 10 }, alignment: { horizontal: 'center', vertical: 'middle' }, border: borderThin, fill: { fgColor: { argb: 'FFF1F5F9' } } };
+      const cellStyle = { border: borderThin, alignment: { horizontal: 'center', vertical: 'middle' } };
+      const labelStyle = { font: { bold: true, size: 10 }, border: { bottom: {style:'thin'} } };
+
+      for (let mes = 0; mes < 12; mes++) {
+        const ws = wb.addWorksheet(nombresMeses[mes]);
         const claveMes = `${anioActual}-${String(mes+1).padStart(2,'0')}`;
         const diasEnMes = new Date(anioActual, mes + 1, 0).getDate();
         const registrosMes = datos[claveMes] || {};
-        const wsData = [
-          ['REGISTRO DIARIO DE JORNADA'],
-          ['En cumplimiento del art. 34.9 ET'],
-          [],
-          ['EMPRESA:', config.empresa, '', 'C.I.F.', config.cif, '', 'C.C.C.', config.ccc, '', '', 'MES', nombresMeses[mes] + ' ' + anioActual],
-          ['TRABAJADOR/A:', config.trabajador, '', 'N.I.F', config.nif, '', 'N.A.F', config.naf, '', '', 'AÑO', anioActual],
-          [],
-          ['DÍA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','HORAS ORD.','HORAS EXTRA.','OBSERVACIONES']
-        ];
+
+        ws.mergeCells('A1:L1'); ws.getCell('A1').value = 'REGISTRO DIARIO DE JORNADA';
+        ws.getCell('A1').font = { bold: true, size: 14, name: 'Calibri' }; ws.getCell('A1').alignment = { horizontal: 'center' };
+        ws.mergeCells('A2:L2'); ws.getCell('A2').value = 'En cumplimiento de la obligación establecida en el artículo 34.9 del Estatuto de los Trabajadores';
+        ws.getCell('A2').font = { italic: true, size: 10, name: 'Calibri' }; ws.getCell('A2').alignment = { horizontal: 'center' };
+
+        const setLabel = (r,c,val) => { const cell = ws.getCell(r,c); cell.value = val; cell.font = labelStyle.font; cell.border = labelStyle.border; };
+        const setVal = (r,c,val) => { const cell = ws.getCell(r,c); cell.value = val; cell.border = { bottom: {style:'thin'} }; };
+        
+        setLabel(4,1,'EMPRESA:'); setVal(4,2,config.empresa); setLabel(4,4,'C.I.F.'); setVal(4,5,config.cif); setLabel(4,7,'C.C.C.'); setVal(4,8,config.ccc);
+        ws.getCell(4,10).value = 'MES'; ws.getCell(4,10).font = labelStyle.font; ws.getCell(4,10).alignment = { horizontal: 'right' }; ws.getCell(4,11).value = `${nombresMeses[mes]} ${anioActual}`;
+        
+        setLabel(5,1,'TRABAJADOR/A:'); setVal(5,2,config.trabajador); setLabel(5,4,'N.I.F'); setVal(5,5,config.nif); setLabel(5,7,'N.A.F'); setVal(5,8,config.naf);
+        ws.getCell(5,10).value = 'AÑO'; ws.getCell(5,10).font = labelStyle.font; ws.getCell(5,10).alignment = { horizontal: 'right' }; ws.getCell(5,11).value = anioActual;
+
+        const h1 = ['DÍA','HORARIO DE MAÑANA','','','','HORARIO DE TARDE','','','','HORAS ORDINARIAS','HORAS EXTRAORD.','OBSEVACIONES'];
+        const h2 = ['DÍA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','HORAS ORDINARIAS','HORAS EXTRAORD.','OBSEVACIONES'];
+        for(let c=0;c<12;c++){
+          ws.getCell(7,c+1).value = h1[c]; Object.assign(ws.getCell(7,c+1), headerStyle);
+          ws.getCell(8,c+1).value = h2[c]; Object.assign(ws.getCell(8,c+1), headerStyle);
+        }
+        ws.mergeCells('B7:E7'); ws.mergeCells('F7:I7');
 
         let totalHoras = 0;
         for(let d=1; d<=diasEnMes; d++) {
           const reg = registrosMes[String(d).padStart(2,'0')] || {};
-          const horas = reg.horas || 0;
-          totalHoras += horas;
-          wsData.push([d, reg.em||'', '', reg.sm||'', '', reg.et||'', '', reg.st||'', '', horas, '', reg.obs||'']);
+          const horas = reg.horas || 0; totalHoras += horas;
+          const row = [d, reg.em||'', '', reg.sm||'', '', reg.et||'', '', reg.st||'', '', horas, '', reg.obs||''];
+          for(let c=0; c<12; c++) {
+            const cell = ws.getCell(8+d, c+1);
+            cell.value = row[c];
+            Object.assign(cell, cellStyle);
+            if(c===9) cell.numFmt = '0';
+          }
         }
-        wsData.push([]);
-        wsData.push(['Fdo. La Empresa', '', '', '', '', 'Fdo. Trabajador/a', '', '', '', `Total: ${totalHoras}h`, '', '']);
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        ws['!cols'] = [{wch:5},{wch:10},{wch:8},{wch:10},{wch:8},{wch:10},{wch:8},{wch:10},{wch:8},{wch:10},{wch:12},{wch:20}];
-        XLSX.utils.book_append_sheet(wb, ws, nombresMeses[mes]);
+        const last = 8 + diasEnMes + 2;
+        ws.getCell(`A${last}`).value = 'Fdo. La Empresa'; ws.getCell(`A${last}`).font = { italic: true };
+        ws.getCell(`F${last}`).value = 'Fdo. Trabajador/a'; ws.getCell(`F${last}`).font = { italic: true };
+        ws.getCell(`J${last}`).value = `Total: ${totalHoras}h`; ws.getCell(`J${last}`).font = { bold: true };
+
+        ws.columns = [
+          { width: 7 }, { width: 11 }, { width: 12 }, { width: 11 }, { width: 12 },
+          { width: 11 }, { width: 12 }, { width: 11 }, { width: 12 },
+          { width: 12 }, { width: 12 }, { width: 20 }
+        ];
       }
-      XLSX.writeFile(wb, `${anioActual}_CONTROL_HORARIO.xlsx`);
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `${anioActual}_CONTROL_HORARIO.xlsx`;
+      a.click(); URL.revokeObjectURL(url);
     } catch(e) { alert('Error generando Excel: ' + e.message); }
+    finally { btn.textContent = '✅ Generar y Descargar'; btn.disabled = false; }
   }
 
   init();
 });
-
-init();
