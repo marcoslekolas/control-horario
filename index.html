@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control Horario</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- ExcelJS para generación con bordes, negritas y celdas combinadas -->
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 <body>
   <header>
@@ -61,7 +62,7 @@
 
   <dialog id="modal-generar">
     <h2>Generar Excel Anual</h2>
-    <p>Se generará un archivo con 12 pestañas (una por mes) para el año:</p>
+    <p>Se generará un archivo con 12 pestañas (una por mes) con formato oficial:</p>
     <p style="font-size:1.5rem; font-weight:bold; color:var(--primary); text-align:center;" id="anio-generar"></p>
     <div class="modal-actions">
       <button id="btn-cancelar-gen" class="sec">Cancelar</button>
