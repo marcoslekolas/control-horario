@@ -1,5 +1,5 @@
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#f4f6f9;padding:20px;line-height:1.5}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f4f6f9;padding:20px;line-height:1.5;color:#333}
 .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);padding:25px}
 .header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #667eea}
 .header h1{color:#333;font-size:1.8em}
@@ -8,11 +8,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f4f6f9;padding:2
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:15px}
 .form-group label{display:block;font-weight:600;font-size:0.9em;margin-bottom:4px;color:#444}
 .form-group input, select{width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:0.95em}
-.btn{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.9em;transition:0.2s}
-.btn:hover{transform:translateY(-1px)}
+.btn{padding:10px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.9em;transition:0.2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{transform:translateY(-1px);opacity:0.9}
+.btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
 .btn-primary{background:#667eea;color:#fff}
 .btn-success{background:#10b981;color:#fff}
 .btn-warning{background:#f59e0b;color:#fff}
+.btn-info{background:#0ea5e9;color:#fff}
 .btn-secondary{background:#6b7280;color:#fff}
 .calendar-header{display:flex;justify-content:space-between;align-items:center;background:#667eea;padding:12px;border-radius:8px;color:#fff;margin-bottom:15px}
 .calendar-header h2{font-size:1.4em;font-weight:700}
@@ -30,3 +32,10 @@ tbody input[type="time"],tbody input[type="number"],tbody input[type="text"]{wid
 .festivo{background:#fef3c7 !important}
 .guardia{background:#dbeafe !important}
 .vacaciones{background:#d1fae5 !important}
+/* Estilos para PDF */
+.pdf-table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11pt}
+.pdf-table th,.pdf-table td{border:1px solid #333;padding:6px;text-align:center}
+.pdf-table th{background:#f0f0f0;font-weight:bold}
+.pdf-header{margin-bottom:15px;text-align:center}
+.pdf-header h2{margin:0 0 5px;font-size:16pt}
+.pdf-header p{margin:0;font-size:9pt;color:#555}
