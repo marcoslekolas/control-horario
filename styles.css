@@ -308,4 +308,57 @@ tbody input:focus {
     width: 100%;
     justify-content: center;
   }
+/* Nuevos estilos para autocompletado */
+.actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 15px;
+}
+
+.action-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.select-jornada {
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95em;
+  background: white;
+  cursor: pointer;
+  min-width: 220px;
+}
+
+.select-jornada:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+  color: white;
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
+}
+
+/* Colores para filas especiales */
+.festivo { background: #fff3e0 !important; }
+.guardia { background: #e3f2fd !important; }
+.vacaciones { background: #e8f5e9 !important; }
+.finsemana { background: #f5f5f5 !important; }
+
+.dia-celda {
+  font-weight: 600;
+  background: #f8f9ff;
+}
+
+.dia-celda small {
+  color: #666;
+  font-size: 0.8em;
 }
