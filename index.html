@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario Mensual</title>
+  <title>Control Horario</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <header>
@@ -48,10 +48,10 @@
     <form id="form-config">
       <label>Empresa:<input type="text" id="cfg-empresa" required></label>
       <label>CIF:<input type="text" id="cfg-cif" required></label>
-      <label>CCC:<input type="text" id="cfg-ccc"></label>
+      <label>CCC:<input type="text" id="cfg-ccc" placeholder="Opcional"></label>
       <label>Trabajador:<input type="text" id="cfg-trabajador" required></label>
       <label>NIF:<input type="text" id="cfg-nif" required></label>
-      <label>NAF:<input type="text" id="cfg-naf"></label>
+      <label>NAF:<input type="text" id="cfg-naf" placeholder="Opcional"></label>
       <div class="modal-actions">
         <button type="button" id="btn-cancelar" class="sec">Cancelar</button>
         <button type="submit" class="primary">Guardar</button>
@@ -61,7 +61,7 @@
 
   <dialog id="modal-generar">
     <h2>Generar Excel Anual</h2>
-    <p>Se generará un Excel con 12 pestañas (una por mes) para el año:</p>
+    <p>Se generará un archivo con 12 pestañas (una por mes) para el año:</p>
     <p style="font-size:1.5rem; font-weight:bold; color:var(--primary); text-align:center;" id="anio-generar"></p>
     <div class="modal-actions">
       <button id="btn-cancelar-gen" class="sec">Cancelar</button>
