@@ -3,79 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario - Registro de Jornada</title>
+  <title>Control Horario Profesional</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <!-- SheetJS estable (no bloquea navegación) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="container">
     <header class="header">
       <h1>📋 Control Horario Laboral</h1>
-      <p class="subtitle">Registro diario de jornada - Art. 34.9 ET</p>
+      <p class="subtitle">Art. 34.9 ET - RDL 8/2019</p>
+      <div id="status-bar" style="background:#e8f5e9; color:#2e7d32; padding:8px; border-radius:6px; font-size:0.9em; text-align:center; margin-top:10px; display:none;"></div>
     </header>
 
     <section class="config-section">
-      <h2>Datos de la Empresa y Trabajador</h2>
+      <h2>Datos Empresa / Trabajador</h2>
       <div class="form-grid">
-        <div class="form-group">
-          <label>Empresa / Razón Social:</label>
-          <input type="text" id="empresa" placeholder="Ej: ALGECIRAS LOGISTIC SOLUTIONS">
-        </div>
-        <div class="form-group">
-          <label>CIF:</label>
-          <input type="text" id="cif" placeholder="Ej: B12345678">
-        </div>
-        <div class="form-group">
-          <label>CCC:</label>
-          <input type="text" id="ccc" placeholder="Ej: 12/12345678/90">
-        </div>
-        <div class="form-group">
-          <label>Trabajador:</label>
-          <input type="text" id="trabajador" placeholder="Nombre completo">
-        </div>
-        <div class="form-group">
-          <label>NIF:</label>
-          <input type="text" id="nif" placeholder="Ej: 12345678A">
-        </div>
-        <div class="form-group">
-          <label>NAF:</label>
-          <input type="text" id="naf" placeholder="Ej: 1234">
-        </div>
+        <div class="form-group"><label>Empresa:</label><input type="text" id="empresa" placeholder="ALGECIRAS LOGISTIC SOLUTIONS"></div>
+        <div class="form-group"><label>CIF:</label><input type="text" id="cif" placeholder="B12345678"></div>
+        <div class="form-group"><label>CCC:</label><input type="text" id="ccc" placeholder="12/12345678/90"></div>
+        <div class="form-group"><label>Trabajador:</label><input type="text" id="trabajador" placeholder="NOMBRE COMPLETO"></div>
+        <div class="form-group"><label>NIF:</label><input type="text" id="nif" placeholder="12345678A"></div>
+        <div class="form-group"><label>NAF:</label><input type="text" id="naf" placeholder="1234"></div>
       </div>
-      <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Configuración</button>
+      <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Configuración</button>
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600;">
+          Tipo Jornada:
+          <select id="tipoJornada" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+            <option value="partido">🔄 Partido (9-14 / 16-18) → 8h</option>
+            <option value="continuo">⏱️ Continuo (8-15) → 7h</option>
+          </select>
+        </label>
+      </div>
     </section>
 
     <section class="calendar-section">
       <div class="calendar-header">
-        <button id="btnPrev" class="btn-nav">◀ Anterior</button>
-        <h2 id="mesActual"></h2>
-        <button id="btnNext" class="btn-nav">Siguiente ▶</button>
+        <button id="btnPrev" class="btn-nav">◀ Mes Anterior</button>
+        <h2 id="mesActual">CARGANDO...</h2>
+        <button id="btnNext" class="btn-nav">Mes Siguiente ▶</button>
       </div>
 
       <div class="table-container">
         <table id="tablaJornada">
           <thead>
             <tr>
-              <th rowspan="2">DÍA</th>
-              <th colspan="2" class="horario-m">MAÑANA</th>
-              <th colspan="2" class="horario-t">TARDE</th>
-              <th rowspan="2">TOTAL HORAS</th>
-              <th rowspan="2">HORAS EXTRAS</th>
-              <th rowspan="2">HORAS COMPLEM.</th>
-              <th rowspan="2">OBSERVACIONES</th>
-            </tr>
-            <tr>
-              <th>Entrada</th>
-              <th>Salida</th>
-              <th>Entrada</th>
-              <th>Salida</th>
+              <th>DÍA</th><th>ENTRADA M.</th><th>SALIDA M.</th><th>ENTRADA T.</th><th>SALIDA T.</th>
+              <th>TOTAL H.</th><th>EXTRAS</th><th>COMPL.</th><th>OBSERVACIONES</th>
             </tr>
           </thead>
           <tbody id="tbodyCalendario"></tbody>
           <tfoot>
             <tr class="total-row">
-              <td><strong>TOTAL MES</strong></td>
-              <td colspan="4"></td>
+              <td>TOTAL MES</td><td colspan="4"></td>
               <td><strong id="totalHorasMes">0</strong></td>
               <td><strong id="totalExtras">0</strong></td>
               <td><strong id="totalComplem">0</strong></td>
@@ -87,26 +68,17 @@
     </section>
 
     <section class="actions-section">
-  <div class="actions-group">
-    <label for="tipoJornada" class="action-label">Tipo de Jornada:</label>
-    <select id="tipoJornada" class="select-jornada">
-      <option value="partido">🔄 Turno Partido (9-14 / 16-18) → 8h</option>
-      <option value="continuo">⏱️ Turno Continuo (8-15) → 7h</option>
-    </select>
-  </div>
-  
-  <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar Mes</button>
-  <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos</button>
-  <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
-  <button id="btnBackup" class="btn btn-secondary">📥 Backup</button>
-  <button id="btnRestore" class="btn btn-secondary">📤 Restaurar</button>
-  <input type="file" id="fileRestore" accept=".json" style="display:none;">
-</section>
+      <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar Mes</button>
+      <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos</button>
+      <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
+      <button id="btnBackup" class="btn btn-secondary">📥 Backup</button>
+      <button id="btnRestore" class="btn btn-secondary">📤 Restaurar</button>
+      <input type="file" id="fileRestore" accept=".json" style="display:none;">
+    </section>
 
     <footer class="legal-footer">
-      <p><strong>Registro realizado en cumplimiento de la obligación establecida en el Art. 34.9 del Real Decreto Legislativo 2/2015 de 23 de Octubre</strong></p>
-      <p>"La empresa garantizará el registro diario de jornada, que deberá incluir el horario concreto de inicio y finalización de la jornada de trabajo de cada persona trabajadora"</p>
-      <p class="small">El empresario deberá conservar los resúmenes mensuales durante un período mínimo de cuatro años.</p>
+      <p>Registro realizado en cumplimiento del Art. 34.9 del RDL 2/2015 (mod. RDL 8/2019).</p>
+      <p>Conservación mínima: 4 años. Copia al trabajador junto con nómina.</p>
     </footer>
   </div>
 
