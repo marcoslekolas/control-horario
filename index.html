@@ -3,38 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Jornada</title>
+  <title>Control Horario Mensual</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>Control Horario</h1>
-    <button id="btn-config">⚙️ Configurar datos</button>
+    <h1>📅 Control Horario</h1>
+    <div class="controls">
+      <button id="btn-prev">◀</button>
+      <span id="mes-actual"></span>
+      <button id="btn-next">▶</button>
+    </div>
   </header>
 
   <main>
-    <form id="registro-form">
-      <label>Fecha: <input type="date" id="fecha" required></label>
-      <label>Horario:</label>
-      <div class="presets">
-        <button type="button" data-m="09:00" data-sm="14:00" data-t="16:00" data-st="18:00">Completa (9-14 / 16-18)</button>
-        <button type="button" data-m="08:00" data-sm="15:00" data-t="" data-st="">Mañana 8-15</button>
-        <button type="button" data-m="09:00" data-sm="14:00" data-t="" data-st="">Solo Mañana (9-14)</button>
-        <button type="button" data-obs="VACACIONES">Vacaciones</button>
-        <button type="button" data-obs="FESTIVO">Festivo</button>
-        <button type="button" data-clear>Limpiar</button>
-      </div>
-      <div class="inputs">
-        <input type="time" id="em" placeholder="Entrada Mañana">
-        <input type="time" id="sm" placeholder="Salida Mañana">
-        <input type="time" id="et" placeholder="Entrada Tarde">
-        <input type="time" id="st" placeholder="Salida Tarde">
-        <input type="text" id="obs" placeholder="Observaciones">
-      </div>
-      <button type="submit">💾 Guardar registro</button>
-    </form>
-    <div id="status"></div>
+    <table id="calendario">
+      <thead>
+        <tr>
+          <th>Día</th><th>Tipo</th><th>Entrada M.</th><th>Salida M.</th><th>Entrada T.</th><th>Salida T.</th><th>Horas</th><th>Obs.</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-calendario"></tbody>
+    </table>
+
+    <div class="actions">
+      <button id="btn-config" class="sec">⚙️ Datos Empresa/Trabajador</button>
+      <button id="btn-generar" class="primary">📥 Generar Excel Mensual</button>
+    </div>
   </main>
+
+  <!-- Modal de configuración previa al Excel -->
+  <dialog id="modal-config">
+    <h2>Revisar días antes de generar</h2>
+    <p>Marca los días que necesites modificar:</p>
+    <div id="lista-revision"></div>
+    <div class="modal-actions">
+      <button id="btn-cancelar" class="sec">Cancelar</button>
+      <button id="btn-confirmar" class="primary">✅ Generar y descargar</button>
+    </div>
+  </dialog>
 
   <script src="app.js"></script>
 </body>
