@@ -168,82 +168,104 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function generarExcelAnual() {
-    const btn = document.getElementById('btn-confirmar-gen');
-    btn.textContent = '⏳ Generando...'; btn.disabled = true;
+    function generarExcelAnual() {
+  const btn = document.getElementById('btn-confirmar-gen');
+  btn.textContent = '⏳ Generando...'; btn.disabled = true;
 
-    try {
-      const wb = new ExcelJS.Workbook();
-      wb.creator = 'Control Horario';
-      const borderThin = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
-      const headerStyle = { font: { bold: true, size: 10, name: 'Calibri' }, alignment: { horizontal: 'center', vertical: 'middle' }, border: borderThin, fill: { fgColor: { argb: 'FFF1F5F9' } } };
-      const cellStyle = { border: borderThin, alignment: { horizontal: 'center', vertical: 'middle' } };
-      const labelStyle = { font: { bold: true, size: 10, name: 'Calibri' }, border: { bottom: {style:'thin'} } };
-
-      for (let mes = 0; mes < 12; mes++) {
-        const ws = wb.addWorksheet(nombresMeses[mes]);
-        const claveMes = `${anioActual}-${String(mes+1).padStart(2,'0')}`;
-        const diasEnMes = new Date(anioActual, mes + 1, 0).getDate();
-        const registrosMes = datos[claveMes] || {};
-
-        ws.mergeCells('A1:L1'); ws.getCell('A1').value = 'REGISTRO DIARIO DE JORNADA';
-        ws.getCell('A1').font = { bold: true, size: 14, name: 'Calibri' }; ws.getCell('A1').alignment = { horizontal: 'center' };
-        ws.mergeCells('A2:L2'); ws.getCell('A2').value = 'En cumplimiento de la obligación establecida en el artículo 34.9 del Estatuto de los Trabajadores';
-        ws.getCell('A2').font = { italic: true, size: 10, name: 'Calibri' }; ws.getCell('A2').alignment = { horizontal: 'center' };
-
-        const setLabel = (r,c,val) => { const cell = ws.getCell(r,c); cell.value = val; cell.font = labelStyle.font; cell.border = labelStyle.border; };
-        const setVal = (r,c,val) => { const cell = ws.getCell(r,c); cell.value = val; cell.border = { bottom: {style:'thin'} }; };
-        
-        setLabel(4,1,'EMPRESA:'); setVal(4,2,config.empresa); setLabel(4,4,'C.I.F.'); setVal(4,5,config.cif); setLabel(4,7,'C.C.C.'); setVal(4,8,config.ccc);
-        ws.getCell(4,10).value = 'MES'; ws.getCell(4,10).font = labelStyle.font; ws.getCell(4,10).alignment = { horizontal: 'right' }; ws.getCell(4,11).value = `${nombresMeses[mes]} ${anioActual}`;
-        
-        setLabel(5,1,'TRABAJADOR/A:'); setVal(5,2,config.trabajador); setLabel(5,4,'N.I.F'); setVal(5,5,config.nif); setLabel(5,7,'N.A.F'); setVal(5,8,config.naf);
-        ws.getCell(5,10).value = 'AÑO'; ws.getCell(5,10).font = labelStyle.font; ws.getCell(5,10).alignment = { horizontal: 'right' }; ws.getCell(5,11).value = anioActual;
-
-        const h1 = ['DÍA','HORARIO DE MAÑANA','','','','HORARIO DE TARDE','','','','HORAS ORDINARIAS','HORAS EXTRAORD.','OBSEVACIONES'];
-        const h2 = ['DÍA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','H. ENTRADA','FIRMA','H. SALIDA','FIRMA','HORAS ORDINARIAS','HORAS EXTRAORD.','OBSEVACIONES'];
-        for(let c=0;c<12;c++){
-          ws.getCell(7,c+1).value = h1[c]; Object.assign(ws.getCell(7,c+1), headerStyle);
-          ws.getCell(8,c+1).value = h2[c]; Object.assign(ws.getCell(8,c+1), headerStyle);
-        }
-        ws.mergeCells('B7:E7'); ws.mergeCells('F7:I7');
-
-        let totalHoras = 0;
-        for(let d=1; d<=diasEnMes; d++) {
-          const reg = registrosMes[String(d).padStart(2,'0')] || {};
-          const horas = reg.horas || 0; totalHoras += horas;
-          const row = [d, reg.em||'', '', reg.sm||'', '', reg.et||'', '', reg.st||'', '', horas, '', reg.obs||''];
-          for(let c=0; c<12; c++) {
-            const cell = ws.getCell(8+d, c+1);
-            cell.value = row[c];
-            Object.assign(cell, cellStyle);
-            if(c===9) cell.numFmt = '0';
-          }
-        }
-
-        const last = 8 + diasEnMes + 2;
-        ws.getCell(`A${last}`).value = 'Fdo. La Empresa'; ws.getCell(`A${last}`).font = { italic: true, name: 'Calibri' };
-        ws.getCell(`F${last}`).value = 'Fdo. Trabajador/a'; ws.getCell(`F${last}`).font = { italic: true, name: 'Calibri' };
-        ws.getCell(`J${last}`).value = `Total: ${totalHoras}h`; ws.getCell(`J${last}`).font = { bold: true, name: 'Calibri' };
-
-        ws.columns = [
-          { width: 7 }, { width: 11 }, { width: 12 }, { width: 11 }, { width: 12 },
-          { width: 11 }, { width: 12 }, { width: 11 }, { width: 12 },
-          { width: 12 }, { width: 12 }, { width: 20 }
-        ];
+  try {
+    // Crear libro de trabajo
+    const wb = XLSX.utils.book_new();
+    
+    for (let mes = 0; mes < 12; mes++) {
+      const claveMes = `${anioActual}-${String(mes+1).padStart(2,'0')}`;
+      const diasEnMes = new Date(anioActual, mes + 1, 0).getDate();
+      const registrosMes = datos[claveMes] || {};
+      
+      // Datos para la hoja (array de arrays)
+      const wsData = [];
+      
+      // Título principal
+      wsData.push([{ t: 's', v: 'REGISTRO DIARIO DE JORNADA' }]);
+      wsData.push([{ t: 's', v: 'En cumplimiento de la obligación establecida en el artículo 34.9 del Estatuto de los Trabajadores' }]);
+      wsData.push([]);
+      
+      // Cabecera empresa
+      wsData.push([
+        'EMPRESA:', config.empresa, '', 'C.I.F.', config.cif, '', 'C.C.C.', config.ccc, '', '', 'MES', `${nombresMeses[mes]} ${anioActual}`
+      ]);
+      // Cabecera trabajador
+      wsData.push([
+        'TRABAJADOR/A:', config.trabajador, '', 'N.I.F', config.nif, '', 'N.A.F', config.naf, '', '', 'AÑO', anioActual
+      ]);
+      wsData.push([]);
+      
+      // Encabezados de tabla - fila 1 (merged visual)
+      wsData.push([
+        'DÍA', 'HORARIO DE MAÑANA', '', '', '', 'HORARIO DE TARDE', '', '', '', '', 'HORAS ORDINARIAS', 'HORAS EXTRAORD.', 'OBSEVACIONES'
+      ]);
+      // Encabezados de tabla - fila 2
+      wsData.push([
+        'DÍA', 'H. ENTRADA', 'FIRMA DEL TRABAJADOR', 'H. SALIDA', 'FIRMA DEL TRABAJADOR', 
+        'H. ENTRADA', 'FIRMA DEL TRABAJADOR', 'H. SALIDA', 'FIRMA DEL TRABAJADOR', '', 
+        'HORAS ORDINARIAS', 'HORAS EXTRAORD.', 'OBSEVACIONES'
+      ]);
+      
+      // Días del mes
+      let totalHoras = 0;
+      for (let d = 1; d <= diasEnMes; d++) {
+        const reg = registrosMes[String(d).padStart(2,'0')] || {};
+        const horas = reg.horas || 0;
+        totalHoras += horas;
+        wsData.push([
+          d, reg.em || '', '', reg.sm || '', '', reg.et || '', '', reg.st || '', '', '', horas, '', reg.obs || ''
+        ]);
       }
-
-      const buffer = await wb.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      a.download = `${anioActual}_CONTROL_HORARIO.xlsx`;
-      a.click(); URL.revokeObjectURL(url);
-    } catch(e) { 
-      console.error(e);
-      alert('Error generando Excel: ' + e.message); 
+      
+      // Pie con firmas y total
+      wsData.push([]);
+      wsData.push(['Fdo. La Empresa', '', '', '', '', 'Fdo. Trabajador/a', '', '', '', '', `Total: ${totalHoras}h`, '', '']);
+      
+      // Crear hoja
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Ajustar anchos de columna para que se vea como tu Excel
+      ws['!cols'] = [
+        { wch: 6 },   // DÍA
+        { wch: 12 },  // H. ENTRADA M
+        { wch: 18 },  // FIRMA
+        { wch: 12 },  // H. SALIDA M
+        { wch: 18 },  // FIRMA
+        { wch: 12 },  // H. ENTRADA T
+        { wch: 18 },  // FIRMA
+        { wch: 12 },  // H. SALIDA T
+        { wch: 18 },  // FIRMA
+        { wch: 5 },   // (vacío)
+        { wch: 15 },  // HORAS ORD
+        { wch: 15 },  // HORAS EXT
+        { wch: 25 }   // OBS
+      ];
+      
+      // Merge cells para "HORARIO DE MAÑANA" y "HORARIO DE TARDE"
+      ws['!merges'] = [
+        { s: { r: 6, c: 1 }, e: { r: 6, c: 4 } },  // HORARIO DE MAÑANA (cols B-E)
+        { s: { r: 6, c: 5 }, e: { r: 6, c: 9 } }   // HORARIO DE TARDE (cols F-J)
+      ];
+      
+      // Añadir hoja al libro
+      XLSX.utils.book_append_sheet(wb, ws, nombresMeses[mes]);
     }
-    finally { btn.textContent = '✅ Generar y Descargar'; btn.disabled = false; }
+    
+    // Descargar archivo
+    const fileName = `${anioActual}_CONTROL_HORARIO.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+  } catch (e) {
+    console.error(e);
+    alert('Error generando Excel: ' + e.message);
+  } finally {
+    btn.textContent = '✅ Generar y Descargar';
+    btn.disabled = false;
   }
-
+}
   init();
 });
