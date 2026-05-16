@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control Horario Profesional</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- SheetJS estable (no bloquea navegación) -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <!-- ExcelJS para Excel con bordes y formato -->
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <!-- html2pdf para exportar a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div class="container">
     <header class="header">
       <h1>📋 Control Horario Laboral</h1>
       <p class="subtitle">Art. 34.9 ET - RDL 8/2019</p>
-      <div id="status-bar" style="background:#e8f5e9; color:#2e7d32; padding:8px; border-radius:6px; font-size:0.9em; text-align:center; margin-top:10px; display:none;"></div>
+      <div id="status-msg" style="background:#e8f5e9; color:#2e7d32; padding:8px; border-radius:6px; font-size:0.9em; text-align:center; margin-top:10px; display:none;"></div>
     </header>
 
     <section class="config-section">
@@ -26,11 +28,10 @@
         <div class="form-group"><label>NIF:</label><input type="text" id="nif" placeholder="12345678A"></div>
         <div class="form-group"><label>NAF:</label><input type="text" id="naf" placeholder="1234"></div>
       </div>
-      <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="margin-top:15px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
         <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Configuración</button>
-        <label style="display:flex; align-items:center; gap:8px; font-weight:600;">
-          Tipo Jornada:
-          <select id="tipoJornada" style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+        <label style="font-weight:600; margin-left:auto;">Tipo Jornada:
+          <select id="tipoJornada" style="padding:8px; border-radius:6px; border:1px solid #ccc; margin-left:5px;">
             <option value="partido">🔄 Partido (9-14 / 16-18) → 8h</option>
             <option value="continuo">⏱️ Continuo (8-15) → 7h</option>
           </select>
@@ -40,9 +41,9 @@
 
     <section class="calendar-section">
       <div class="calendar-header">
-        <button id="btnPrev" class="btn-nav">◀ Mes Anterior</button>
+        <button id="btnPrev" class="btn-nav">◀ Anterior</button>
         <h2 id="mesActual">CARGANDO...</h2>
-        <button id="btnNext" class="btn-nav">Mes Siguiente ▶</button>
+        <button id="btnNext" class="btn-nav">Siguiente ▶</button>
       </div>
 
       <div class="table-container">
@@ -70,7 +71,8 @@
     <section class="actions-section">
       <button id="btnAutocompletar" class="btn btn-warning">⚡ Autocompletar Mes</button>
       <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos</button>
-      <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
+      <button id="btnExcel" class="btn btn-primary">📊 Excel con Bordes</button>
+      <button id="btnPDF" class="btn btn-info">📄 Generar PDF</button>
       <button id="btnBackup" class="btn btn-secondary">📥 Backup</button>
       <button id="btnRestore" class="btn btn-secondary">📤 Restaurar</button>
       <input type="file" id="fileRestore" accept=".json" style="display:none;">
@@ -81,6 +83,9 @@
       <p>Conservación mínima: 4 años. Copia al trabajador junto con nómina.</p>
     </footer>
   </div>
+
+  <!-- Contenedor oculto para PDF -->
+  <div id="pdf-render" style="position:absolute; left:-9999px; top:0;"></div>
 
   <script src="app.js"></script>
 </body>
