@@ -9,7 +9,10 @@
 </head>
 <body>
   <header>
-    <h1>📅 Control Horario</h1>
+    <div>
+      <h1>📅 Control Horario</h1>
+      <p id="info-trabajador" style="font-size:0.85rem; color:#64748b; margin-top:0.25rem;"></p>
+    </div>
     <div class="controls">
       <button id="btn-prev">◀</button>
       <span id="mes-actual"></span>
@@ -28,19 +31,41 @@
     </table>
 
     <div class="actions">
-      <button id="btn-config" class="sec">⚙️ Datos Empresa/Trabajador</button>
-      <button id="btn-generar" class="primary">📥 Generar Excel Mensual</button>
+      <div class="actions-left">
+        <button id="btn-config" class="sec">⚙️ Datos</button>
+        <button id="btn-export" class="sec">💾 Backup</button>
+        <button id="btn-import" class="sec">📂 Restaurar</button>
+        <input type="file" id="file-import" accept=".json" style="display:none;">
+      </div>
+      <div class="actions-right">
+        <button id="btn-generar-anual" class="primary">📊 Generar Excel Anual</button>
+      </div>
     </div>
   </main>
 
-  <!-- Modal de configuración previa al Excel -->
   <dialog id="modal-config">
-    <h2>Revisar días antes de generar</h2>
-    <p>Marca los días que necesites modificar:</p>
-    <div id="lista-revision"></div>
+    <h2>Datos de Empresa y Trabajador</h2>
+    <form id="form-config">
+      <label>Empresa:<input type="text" id="cfg-empresa" required></label>
+      <label>CIF:<input type="text" id="cfg-cif" required></label>
+      <label>CCC:<input type="text" id="cfg-ccc"></label>
+      <label>Trabajador:<input type="text" id="cfg-trabajador" required></label>
+      <label>NIF:<input type="text" id="cfg-nif" required></label>
+      <label>NAF:<input type="text" id="cfg-naf"></label>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancelar" class="sec">Cancelar</button>
+        <button type="submit" class="primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="modal-generar">
+    <h2>Generar Excel Anual</h2>
+    <p>Se generará un Excel con 12 pestañas (una por mes) para el año:</p>
+    <p style="font-size:1.5rem; font-weight:bold; color:var(--primary); text-align:center;" id="anio-generar"></p>
     <div class="modal-actions">
-      <button id="btn-cancelar" class="sec">Cancelar</button>
-      <button id="btn-confirmar" class="primary">✅ Generar y descargar</button>
+      <button id="btn-cancelar-gen" class="sec">Cancelar</button>
+      <button id="btn-confirmar-gen" class="primary">✅ Generar y Descargar</button>
     </div>
   </dialog>
 
