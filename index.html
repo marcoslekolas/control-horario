@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario Profesional</title>
+  <title>Control Horario - Registro de Jornada</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <header>
+    <header class="header">
       <h1>📋 Control Horario Laboral</h1>
-      <p>Registro diario de jornada - Art. 34.9 ET</p>
+      <p class="subtitle">Registro diario de jornada - Art. 34.9 ET</p>
     </header>
 
     <section class="config-section">
@@ -42,17 +42,18 @@
           <input type="text" id="naf" placeholder="Ej: 1234">
         </div>
       </div>
+      <button id="btnGuardarConfig" class="btn btn-primary">💾 Guardar Configuración</button>
     </section>
 
     <section class="calendar-section">
       <div class="calendar-header">
-        <button id="btn-prev" class="btn-nav">◀ Mes Anterior</button>
-        <h2 id="mes-actual"></h2>
-        <button id="btn-next" class="btn-nav">Mes Siguiente ▶</button>
+        <button id="btnPrev" class="btn-nav">◀ Anterior</button>
+        <h2 id="mesActual"></h2>
+        <button id="btnNext" class="btn-nav">Siguiente ▶</button>
       </div>
 
       <div class="table-container">
-        <table id="calendario">
+        <table id="tablaJornada">
           <thead>
             <tr>
               <th rowspan="2">DÍA</th>
@@ -61,7 +62,7 @@
               <th rowspan="2">TOTAL HORAS</th>
               <th rowspan="2">HORAS EXTRAS</th>
               <th rowspan="2">HORAS COMPLEM.</th>
-              <th rowspan="2">FIRMA</th>
+              <th rowspan="2">OBSERVACIONES</th>
             </tr>
             <tr>
               <th>Entrada</th>
@@ -70,14 +71,14 @@
               <th>Salida</th>
             </tr>
           </thead>
-          <tbody id="tbody-calendario"></tbody>
+          <tbody id="tbodyCalendario"></tbody>
           <tfoot>
             <tr class="total-row">
               <td><strong>TOTAL MES</strong></td>
               <td colspan="4"></td>
-              <td><strong id="total-horas-mes">0</strong></td>
-              <td><strong id="total-extras">0</strong></td>
-              <td><strong id="total-complem">0</strong></td>
+              <td><strong id="totalHorasMes">0</strong></td>
+              <td><strong id="totalExtras">0</strong></td>
+              <td><strong id="totalComplem">0</strong></td>
               <td></td>
             </tr>
           </tfoot>
@@ -86,11 +87,11 @@
     </section>
 
     <section class="actions-section">
-      <button id="btn-guardar" class="btn-primary">💾 Guardar Datos</button>
-      <button id="btn-excel" class="btn-success">📊 Generar Excel Profesional</button>
-      <button id="btn-backup" class="btn-secondary">📥 Backup JSON</button>
-      <input type="file" id="file-restore" accept=".json" style="display:none;">
-      <button id="btn-restore" class="btn-secondary">📤 Restaurar Backup</button>
+      <button id="btnGuardar" class="btn btn-success">💾 Guardar Datos del Mes</button>
+      <button id="btnExcel" class="btn btn-primary">📊 Generar Excel</button>
+      <button id="btnBackup" class="btn btn-secondary">📥 Backup JSON</button>
+      <button id="btnRestore" class="btn btn-secondary">📤 Restaurar Backup</button>
+      <input type="file" id="fileRestore" accept=".json" style="display:none;">
     </section>
 
     <footer class="legal-footer">
