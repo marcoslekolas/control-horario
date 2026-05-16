@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario Profesional</title>
+  <title>Control Horario</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- CDNs verificados -->
+  <!-- ExcelJS desde jsDelivr (más fiable) -->
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-  <div id="loader">⏳ Cargando librerías... (si tarda >5s, desactiva bloqueadores de anuncios)</div>
-  <div id="error-box" style="display:none; background:#fee2e2; color:#b91c1c; padding:20px; margin:20px; border-radius:8px; text-align:center;"></div>
+  <!-- Pantalla de carga con fallback -->
+  <div id="loader">⏳ Cargando... <small style="display:block;margin-top:8px;color:#666;font-size:0.9em">Si tarda >5s: desactiva bloqueadores para github.io</small></div>
+  
+  <!-- Caja de errores (siempre visible si hay problema) -->
+  <div id="error-box" style="display:none;background:#fee2e2;color:#b91c1c;padding:15px;margin:15px;border-radius:8px;text-align:center;font-size:0.95em;"></div>
 
+  <!-- App principal (oculta hasta que cargue) -->
   <div class="container" id="app" style="display:none;">
     <header>
       <h1>📋 Control Horario Laboral</h1>
@@ -69,7 +72,7 @@
       <button id="btnAuto" class="btn warn">⚡ Autocompletar</button>
       <button id="btnGuardar" class="btn success">💾 Guardar Mes</button>
       <button id="btnExcel" class="btn primary">📊 Excel con Bordes</button>
-      <button id="btnPDF" class="btn info">📄 Generar PDF</button>
+      <button id="btnPDF" class="btn info" title="Genera Excel y ábrelo en Excel > Guardar como PDF">📄 PDF (vía Excel)</button>
       <button id="btnBackup" class="btn secondary">📥 Backup</button>
       <button id="btnRestore" class="btn secondary">📤 Restaurar</button>
       <input type="file" id="fileRestore" accept=".json" hidden>
@@ -77,9 +80,6 @@
 
     <footer class="legal">Registro Art. 34.9 ET. Conservación mínima: 4 años.</footer>
   </div>
-
-  <!-- Contenedor oculto para PDF -->
-  <div id="pdf-container" style="position:absolute; left:-9999px; top:0; width:210mm; padding:15mm; background:#fff; font-family:Arial, sans-serif;"></div>
 
   <script src="app.js"></script>
 </body>
