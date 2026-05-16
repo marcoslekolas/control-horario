@@ -1,1 +1,11 @@
-
+{
+  "config": {
+    "empresa": "",
+    "cif": "",
+    "ccc": "",
+    "trabajador": "",
+    "nif": "",
+    "naf": ""
+  },
+  "registros": []
+}
