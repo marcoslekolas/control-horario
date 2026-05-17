@@ -1,86 +1,321 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Horario</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- ExcelJS desde jsDelivr (más fiable) -->
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Jornada Laboral</title>
+    <!-- Tailwind CSS para diseño rápido y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-  <!-- Pantalla de carga con fallback -->
-  <div id="loader">⏳ Cargando... <small style="display:block;margin-top:8px;color:#666;font-size:0.9em">Si tarda >5s: desactiva bloqueadores para github.io</small></div>
-  
-  <!-- Caja de errores (siempre visible si hay problema) -->
-  <div id="error-box" style="display:none;background:#fee2e2;color:#b91c1c;padding:15px;margin:15px;border-radius:8px;text-align:center;font-size:0.95em;"></div>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
 
-  <!-- App principal (oculta hasta que cargue) -->
-  <div class="container" id="app" style="display:none;">
-    <header>
-      <h1>📋 Control Horario Laboral</h1>
-      <p class="sub">Art. 34.9 ET - RDL 8/2019</p>
-    </header>
+    <!-- Barra Superior -->
+    <nav class="bg-blue-800 text-white p-4 shadow-md">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fas fa-clock mr-2"></i>Registro de Jornada</h1>
+            <button onclick="toggleConfig()" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+                <i class="fas fa-cog mr-1"></i> Configuración
+            </button>
+        </div>
+    </nav>
 
-    <section class="config">
-      <h2>Datos Empresa / Trabajador</h2>
-      <div class="grid">
-        <div class="field"><label>Empresa:</label><input id="empresa" type="text"></div>
-        <div class="field"><label>CIF:</label><input id="cif" type="text"></div>
-        <div class="field"><label>CCC:</label><input id="ccc" type="text"></div>
-        <div class="field"><label>Trabajador:</label><input id="trabajador" type="text"></div>
-        <div class="field"><label>NIF:</label><input id="nif" type="text"></div>
-        <div class="field"><label>NAF:</label><input id="naf" type="text"></div>
-      </div>
-      <div class="actions-row">
-        <button id="btnGuardarConfig" class="btn primary">💾 Guardar Config</button>
-        <label class="select-wrap">Tipo Jornada:
-          <select id="tipoJornada">
-            <option value="partido">Partido (9-14 / 16-18)</option>
-            <option value="continuo">Continuo (8-15)</option>
-          </select>
-        </label>
-      </div>
-    </section>
+    <!-- Panel de Configuración (Oculto por defecto) -->
+    <div id="configPanel" class="hidden bg-white border-b shadow-sm">
+        <div class="max-w-5xl mx-auto p-6 grid md:grid-cols-2 gap-6">
+            <!-- Datos Empresa -->
+            <div>
+                <h3 class="font-bold text-blue-700 mb-2">Datos de la Empresa</h3>
+                <input type="text" id="cfgEmpresa" placeholder="Nombre Empresa" class="w-full border p-2 mb-2 rounded">
+                <input type="text" id="cfgCIF" placeholder="CIF" class="w-full border p-2 mb-2 rounded">
+                <input type="text" id="cfgCCC" placeholder="CCC" class="w-full border p-2 rounded">
+            </div>
+            <!-- Datos Trabajador -->
+            <div>
+                <h3 class="font-bold text-blue-700 mb-2">Datos del Trabajador/a</h3>
+                <input type="text" id="cfgNombre" placeholder="Nombre y Apellidos" class="w-full border p-2 mb-2 rounded">
+                <input type="text" id="cfgNIF" placeholder="NIF" class="w-full border p-2 mb-2 rounded">
+                <input type="text" id="cfgNAF" placeholder="NAF" class="w-full border p-2 rounded">
+            </div>
+            <!-- Jornada Tipo -->
+            <div class="md:col-span-2">
+                <h3 class="font-bold text-blue-700 mb-2">Jornada Tipo (Para auto-relleno)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <input type="time" id="cfgMananaIn" class="border p-2 rounded" title="Entrada Mañana">
+                    <input type="time" id="cfgMananaOut" class="border p-2 rounded" title="Salida Mañana">
+                    <input type="time" id="cfgTardeIn" class="border p-2 rounded" title="Entrada Tarde">
+                    <input type="time" id="cfgTardeOut" class="border p-2 rounded" title="Salida Tarde">
+                </div>
+            </div>
+            <div class="md:col-span-2 text-right">
+                <button onclick="guardarConfig()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold">
+                    <i class="fas fa-save mr-1"></i> Guardar Configuración
+                </button>
+            </div>
+        </div>
+    </div>
 
-    <section class="calendar">
-      <div class="nav">
-        <button id="btnPrev" class="btn nav">◀ Anterior</button>
-        <h2 id="mesLabel">CARGANDO...</h2>
-        <button id="btnNext" class="btn nav">Siguiente ▶</button>
-      </div>
-      <div class="table-wrap">
-        <table id="tabla">
-          <thead>
-            <tr>
-              <th>DÍA</th><th>ENTRADA M.</th><th>SALIDA M.</th><th>ENTRADA T.</th><th>SALIDA T.</th>
-              <th>TOTAL H.</th><th>EXTRAS</th><th>COMPL.</th><th>OBSERVACIONES</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-          <tfoot>
-            <tr class="total-row">
-              <td>TOTAL MES</td><td colspan="4"></td>
-              <td id="tH">0</td><td id="tE">0</td><td id="tC">0</td><td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </section>
+    <!-- Cuerpo Principal -->
+    <main class="flex-grow max-w-5xl mx-auto w-full p-4">
+        
+        <!-- Navegación de Meses -->
+        <div class="flex justify-between items-center mb-4 bg-white p-3 rounded shadow">
+            <button onclick="cambiarMes(-1)" class="text-blue-600 hover:text-blue-800 text-2xl"><i class="fas fa-chevron-left"></i></button>
+            <h2 id="tituloMes" class="text-2xl font-bold text-gray-700 uppercase"></h2>
+            <button onclick="cambiarMes(1)" class="text-blue-600 hover:text-blue-800 text-2xl"><i class="fas fa-chevron-right"></i></button>
+        </div>
 
-    <section class="actions">
-      <button id="btnAuto" class="btn warn">⚡ Autocompletar</button>
-      <button id="btnGuardar" class="btn success">💾 Guardar Mes</button>
-      <button id="btnExcel" class="btn primary">📊 Excel con Bordes</button>
-      <button id="btnPDF" class="btn info" title="Genera Excel y ábrelo en Excel > Guardar como PDF">📄 PDF (vía Excel)</button>
-      <button id="btnBackup" class="btn secondary">📥 Backup</button>
-      <button id="btnRestore" class="btn secondary">📤 Restaurar</button>
-      <input type="file" id="fileRestore" accept=".json" hidden>
-    </section>
+        <!-- Acciones Rápidas -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="autoRellenar()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm shadow">
+                <i class="fas fa-magic mr-1"></i> Auto-rellenar laborables
+            </button>
+            <button onclick="guardarRegistros()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm shadow ml-auto">
+                <i class="fas fa-save mr-1"></i> Guardar Mes
+            </button>
+        </div>
 
-    <footer class="legal">Registro Art. 34.9 ET. Conservación mínima: 4 años.</footer>
-  </div>
+        <!-- Tabla de Registros -->
+        <div class="bg-white rounded shadow overflow-x-auto">
+            <table class="w-full text-sm text-center">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-xs leading-normal">
+                        <th class="p-2 w-10">Día</th>
+                        <th class="p-2">Mañana Entrada</th>
+                        <th class="p-2">Mañana Salida</th>
+                        <th class="p-2">Tarde Entrada</th>
+                        <th class="p-2">Tarde Salida</th>
+                        <th class="p-2 w-16">Horas</th>
+                        <th class="p-2">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaRegistros" class="text-gray-700">
+                    <!-- Se generará dinámicamente con JS -->
+                </tbody>
+            </table>
+        </div>
 
-  <script src="app.js"></script>
+        <!-- Total Mes -->
+        <div class="mt-4 bg-white p-4 rounded shadow flex justify-between items-center text-xl font-bold text-blue-800">
+            <span>Total Horas Mes:</span>
+            <span id="totalHoras">0:00</span>
+        </div>
+
+    </main>
+
+    <!-- Script de Lógica -->
+    <script>
+        // Variables de estado
+        let fechaActual = new Date();
+        let mesActual = fechaActual.getMonth();
+        let anioActual = fechaActual.getFullYear();
+        let config = {};
+        let registros = {};
+
+        // Inicialización al cargar
+        window.onload = () => {
+            cargarConfig();
+            cargarMes();
+        };
+
+        // --- FUNCIONES DE CONFIGURACIÓN ---
+        function toggleConfig() {
+            const panel = document.getElementById('configPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function guardarConfig() {
+            config = {
+                empresa: document.getElementById('cfgEmpresa').value,
+                cif: document.getElementById('cfgCIF').value,
+                ccc: document.getElementById('cfgCCC').value,
+                nombre: document.getElementById('cfgNombre').value,
+                nif: document.getElementById('cfgNIF').value,
+                naf: document.getElementById('cfgNAF').value,
+                mananaIn: document.getElementById('cfgMananaIn').value,
+                mananaOut: document.getElementById('cfgMananaOut').value,
+                tardeIn: document.getElementById('cfgTardeIn').value,
+                tardeOut: document.getElementById('cfgTardeOut').value
+            };
+            localStorage.setItem('jornadaConfig', JSON.stringify(config));
+            alert('Configuración guardada');
+            toggleConfig();
+        }
+
+        function cargarConfig() {
+            const saved = localStorage.getItem('jornadaConfig');
+            if (saved) {
+                config = JSON.parse(saved);
+                document.getElementById('cfgEmpresa').value = config.empresa || '';
+                document.getElementById('cfgCIF').value = config.cif || '';
+                document.getElementById('cfgCCC').value = config.ccc || '';
+                document.getElementById('cfgNombre').value = config.nombre || '';
+                document.getElementById('cfgNIF').value = config.nif || '';
+                document.getElementById('cfgNAF').value = config.naf || '';
+                document.getElementById('cfgMananaIn').value = config.mananaIn || '';
+                document.getElementById('cfgMananaOut').value = config.mananaOut || '';
+                document.getElementById('cfgTardeIn').value = config.tardeIn || '';
+                document.getElementById('cfgTardeOut').value = config.tardeOut || '';
+            }
+        }
+
+        // --- FUNCIONES DEL CALENDARIO Y REGISTROS ---
+        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        function cambiarMes(delta) {
+            guardarRegistros(); // Guarda antes de irse
+            mesActual += delta;
+            if (mesActual > 11) { mesActual = 0; anioActual++; }
+            if (mesActual < 0) { mesActual = 11; anioActual--; }
+            cargarMes();
+        }
+
+        function cargarMes() {
+            document.getElementById('tituloMes').innerText = `${nombresMeses[mesActual]} ${anioActual}`;
+            const claveMes = `${anioActual}-${mesActual}`;
+            const savedData = localStorage.getItem(`jornada_${claveMes}`);
+            registros = savedData ? JSON.parse(savedData) : {};
+            renderTabla();
+            calcularTotal();
+        }
+
+        function renderTabla() {
+            const tbody = document.getElementById('tablaRegistros');
+            tbody.innerHTML = '';
+            const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
+
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const fechaIter = new Date(anioActual, mesActual, dia);
+                const diaSemana = fechaIter.getDay(); // 0=Dom, 6=Sab
+                const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
+                
+                // Cargar datos guardados o dejar vacío
+                const reg = registros[dia] || {};
+
+                const tr = document.createElement('tr');
+                tr.className = `border-b hover:bg-gray-50 ${esFinDeSemana ? 'bg-gray-50 text-gray-400' : ''}`;
+                
+                tr.innerHTML = `
+                    <td class="p-2 font-bold">${dia}</td>
+                    <td><input type="time" id="mIn_${dia}" value="${reg.mIn || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
+                    <td><input type="time" id="mOut_${dia}" value="${reg.mOut || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
+                    <td><input type="time" id="tIn_${dia}" value="${reg.tIn || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
+                    <td><input type="time" id="tOut_${dia}" value="${reg.tOut || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
+                    <td class="font-bold p-2" id="horas_${dia}">0:00</td>
+                    <td>
+                        <select id="obs_${dia}" class="w-full border rounded p-1 text-xs ${esFinDeSemana ? 'bg-gray-50' : ''}" onchange="manejarObservacion(${dia}, this.value)">
+                            <option value="">Normal</option>
+                            <option value="Festivo" ${reg.obs === 'Festivo' ? 'selected' : ''}>Festivo</option>
+                            <option value="Vacaciones" ${reg.obs === 'Vacaciones' ? 'selected' : ''}>Vacaciones</option>
+                            <option value="Baja" ${reg.obs === 'Baja' ? 'selected' : ''}>Baja Médica</option>
+                            <option value="Permiso" ${reg.obs === 'Permiso' ? 'selected' : ''}>Permiso</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+                // Calcular horas del día recién añadido
+                calcularHorasDia(dia);
+            }
+        }
+
+        function manejarObservacion(dia, valor) {
+            if (valor !== "") {
+                // Si marca festivo, vacaciones, etc., limpiamos las horas
+                document.getElementById(`mIn_${dia}`).value = '';
+                document.getElementById(`mOut_${dia}`).value = '';
+                document.getElementById(`tIn_${dia}`).value = '';
+                document.getElementById(`tOut_${dia}`).value = '';
+            }
+            calcularTotal();
+        }
+
+        function autoRellenar() {
+            if (!config.mananaIn) {
+                alert("Configura primero tu Jornada Tipo en el panel de configuración.");
+                return;
+            }
+            const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const fechaIter = new Date(anioActual, mesActual, dia);
+                const diaSemana = fechaIter.getDay();
+                const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
+                const obs = document.getElementById(`obs_${dia}`).value;
+                
+                // Solo rellena si es laborable, no tiene observación especial y está vacío
+                if (!esFinDeSemana && obs === "" && !document.getElementById(`mIn_${dia}`).value) {
+                    document.getElementById(`mIn_${dia}`).value = config.mananaIn;
+                    document.getElementById(`mOut_${dia}`).value = config.mananaOut;
+                    document.getElementById(`tIn_${dia}`).value = config.tardeIn;
+                    document.getElementById(`tOut_${dia}`).value = config.tardeOut;
+                }
+            }
+            calcularTotal();
+        }
+
+        // --- CÁLCULOS DE HORAS ---
+        function calcularHorasDia(dia) {
+            const mIn = document.getElementById(`mIn_${dia}`).value;
+            const mOut = document.getElementById(`mOut_${dia}`).value;
+            const tIn = document.getElementById(`tIn_${dia}`).value;
+            const tOut = document.getElementById(`tOut_${dia}`).value;
+            const obs = document.getElementById(`obs_${dia}`).value;
+
+            let totalMinutos = 0;
+
+            if (mIn && mOut) totalMinutos += tiempoEntre(mIn, mOut);
+            if (tIn && tOut) totalMinutos += tiempoEntre(tIn, tOut);
+
+            // Si es Festivo, podríamos computar las horas pero en tu Excel aparecen como 8 o 5 fijos.
+            // Por ahora, si hay horas sumamos, si no hay horas y es Vacaciones/Festivo, sumamos 0 (luego ajustaremos en Fase 2).
+            
+            const horas = Math.floor(totalMinutos / 60);
+            const minutos = totalMinutos % 60;
+            
+            document.getElementById(`horas_${dia}`).innerText = totalMinutos > 0 ? `${horas}:${minutos.toString().padStart(2, '0')}` : '0:00';
+        }
+
+        function tiempoEntre(inicio, fin) {
+            const [hIn, mIn] = inicio.split(':').map(Number);
+            const [hOut, mOut] = fin.split(':').map(Number);
+            return (hOut * 60 + mOut) - (hIn * 60 + mIn);
+        }
+
+        function calcularTotal() {
+            const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
+            let totalMinutos = 0;
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                calcularHorasDia(dia);
+                const textoHoras = document.getElementById(`horas_${dia}`).innerText;
+                const [h, m] = textoHoras.split(':').map(Number);
+                totalMinutos += (h * 60) + m;
+            }
+            const totalH = Math.floor(totalMinutos / 60);
+            const totalM = totalMinutos % 60;
+            document.getElementById('totalHoras').innerText = `${totalH}:${totalM.toString().padStart(2, '0')}`;
+        }
+
+        // --- GUARDADO ---
+        function guardarRegistros() {
+            const claveMes = `${anioActual}-${mesActual}`;
+            const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
+            let dataParaGuardar = {};
+
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                dataParaGuardar[dia] = {
+                    mIn: document.getElementById(`mIn_${dia}`).value,
+                    mOut: document.getElementById(`mOut_${dia}`).value,
+                    tIn: document.getElementById(`tIn_${dia}`).value,
+                    tOut: document.getElementById(`tOut_${dia}`).value,
+                    obs: document.getElementById(`obs_${dia}`).value
+                };
+            }
+            localStorage.setItem(`jornada_${claveMes}`, JSON.stringify(dataParaGuardar));
+        }
+        
+        // Guardar automáticamente al cambiar de pestaña o cerrar
+        window.addEventListener('beforeunload', guardarRegistros);
+
+    </script>
 </body>
 </html>
