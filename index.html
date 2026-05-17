@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Jornada Laboral</title>
-    <!-- Tailwind CSS para diseño rápido y responsivo -->
+    <title>Registro de Jornada Laboral - Legal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Librerías para PDF y Firma -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
 
     <!-- Barra Superior -->
-    <nav class="bg-blue-800 text-white p-4 shadow-md">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold"><i class="fas fa-clock mr-2"></i>Registro de Jornada</h1>
-            <button onclick="toggleConfig()" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
+    <nav class="bg-blue-900 text-white p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fas fa-clock mr-2"></i>Registro de Jornada (RDLO 8/2019)</h1>
+            <button onclick="toggleConfig()" class="bg-blue-700 hover:bg-blue-600 px-3 py-1 rounded text-sm">
                 <i class="fas fa-cog mr-1"></i> Configuración
             </button>
         </div>
     </nav>
 
-    <!-- Panel de Configuración (Oculto por defecto) -->
-    <div id="configPanel" class="hidden bg-white border-b shadow-sm">
-        <div class="max-w-5xl mx-auto p-6 grid md:grid-cols-2 gap-6">
+    <!-- Panel de Configuración -->
+    <div id="configPanel" class="hidden bg-white border-b shadow-sm overflow-y-auto max-h-[80vh]">
+        <div class="max-w-6xl mx-auto p-6 grid md:grid-cols-2 gap-6">
             <!-- Datos Empresa -->
             <div>
-                <h3 class="font-bold text-blue-700 mb-2">Datos de la Empresa</h3>
+                <h3 class="font-bold text-blue-700 mb-2 border-b pb-1">Datos de la Empresa</h3>
                 <input type="text" id="cfgEmpresa" placeholder="Nombre Empresa" class="w-full border p-2 mb-2 rounded">
                 <input type="text" id="cfgCIF" placeholder="CIF" class="w-full border p-2 mb-2 rounded">
                 <input type="text" id="cfgCCC" placeholder="CCC" class="w-full border p-2 rounded">
             </div>
             <!-- Datos Trabajador -->
             <div>
-                <h3 class="font-bold text-blue-700 mb-2">Datos del Trabajador/a</h3>
+                <h3 class="font-bold text-blue-700 mb-2 border-b pb-1">Datos del Trabajador/a</h3>
                 <input type="text" id="cfgNombre" placeholder="Nombre y Apellidos" class="w-full border p-2 mb-2 rounded">
                 <input type="text" id="cfgNIF" placeholder="NIF" class="w-full border p-2 mb-2 rounded">
                 <input type="text" id="cfgNAF" placeholder="NAF" class="w-full border p-2 rounded">
             </div>
-            <!-- Jornada Tipo -->
+            
+            <!-- Tipos de Jornada -->
             <div class="md:col-span-2">
-                <h3 class="font-bold text-blue-700 mb-2">Jornada Tipo (Para auto-relleno)</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <input type="time" id="cfgMananaIn" class="border p-2 rounded" title="Entrada Mañana">
-                    <input type="time" id="cfgMananaOut" class="border p-2 rounded" title="Salida Mañana">
-                    <input type="time" id="cfgTardeIn" class="border p-2 rounded" title="Entrada Tarde">
-                    <input type="time" id="cfgTardeOut" class="border p-2 rounded" title="Salida Tarde">
-                </div>
+                <h3 class="font-bold text-blue-700 mb-2 border-b pb-1">Tipos de Jornada (Para auto-relleno)</h3>
+                <div id="jornadasContainer" class="space-y-3 mb-4"></div>
+                <button onclick="addJornada()" class="text-sm text-blue-600 hover:text-blue-800"><i class="fas fa-plus mr-1"></i> Añadir Tipo de Jornada</button>
             </div>
-            <div class="md:col-span-2 text-right">
-                <button onclick="guardarConfig()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold">
+
+            <div class="md:col-span-2 flex justify-end">
+                <button onclick="guardarConfig()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold shadow">
                     <i class="fas fa-save mr-1"></i> Guardar Configuración
                 </button>
             </div>
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Cuerpo Principal -->
-    <main class="flex-grow max-w-5xl mx-auto w-full p-4">
+    <main class="flex-grow max-w-6xl mx-auto w-full p-4">
         
         <!-- Navegación de Meses -->
         <div class="flex justify-between items-center mb-4 bg-white p-3 rounded shadow">
@@ -67,13 +67,22 @@
         </div>
 
         <!-- Acciones Rápidas -->
-        <div class="flex gap-2 mb-4">
+        <div class="flex flex-wrap gap-2 mb-4 items-center">
+            <select id="autoRellenoSelect" class="border p-2 rounded text-sm shadow">
+                <option value="">Seleccionar jornada para auto-rellenar...</option>
+            </select>
             <button onclick="autoRellenar()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm shadow">
-                <i class="fas fa-magic mr-1"></i> Auto-rellenar laborables
+                <i class="fas fa-magic mr-1"></i> Auto-rellenar mes
             </button>
-            <button onclick="guardarRegistros()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm shadow ml-auto">
-                <i class="fas fa-save mr-1"></i> Guardar Mes
-            </button>
+            
+            <div class="ml-auto flex gap-2">
+                <button onclick="guardarRegistros()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm shadow">
+                    <i class="fas fa-save mr-1"></i> Guardar
+                </button>
+                <button onclick="abrirModalPDF()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm shadow">
+                    <i class="fas fa-file-pdf mr-1"></i> Generar Informe PDF
+                </button>
+            </div>
         </div>
 
         <!-- Tabla de Registros -->
@@ -82,27 +91,54 @@
                 <thead>
                     <tr class="bg-gray-200 text-gray-600 uppercase text-xs leading-normal">
                         <th class="p-2 w-10">Día</th>
-                        <th class="p-2">Mañana Entrada</th>
-                        <th class="p-2">Mañana Salida</th>
-                        <th class="p-2">Tarde Entrada</th>
-                        <th class="p-2">Tarde Salida</th>
-                        <th class="p-2 w-16">Horas</th>
-                        <th class="p-2">Observaciones</th>
+                        <th class="p-2 w-28">Jornada</th>
+                        <th class="p-2">Entrada M.</th>
+                        <th class="p-2">Salida M.</th>
+                        <th class="p-2">Entrada T.</th>
+                        <th class="p-2">Salida T.</th>
+                        <th class="p-2 w-16">Ordinarias</th>
+                        <th class="p-2 w-16">Extras/Guardia</th>
+                        <th class="p-2 w-28">Observaciones</th>
                     </tr>
                 </thead>
-                <tbody id="tablaRegistros" class="text-gray-700">
-                    <!-- Se generará dinámicamente con JS -->
-                </tbody>
+                <tbody id="tablaRegistros" class="text-gray-700"></tbody>
             </table>
         </div>
 
-        <!-- Total Mes -->
-        <div class="mt-4 bg-white p-4 rounded shadow flex justify-between items-center text-xl font-bold text-blue-800">
-            <span>Total Horas Mes:</span>
-            <span id="totalHoras">0:00</span>
+        <!-- Totales Mes -->
+        <div class="mt-4 bg-white p-4 rounded shadow flex flex-wrap gap-4 justify-between items-center text-lg font-bold text-blue-900">
+            <span>Horas Ordinarias: <span id="totalOrd" class="text-blue-600">0:00</span></span>
+            <span>Horas Extras/Guardia: <span id="totalExt" class="text-red-600">0:00</span></span>
+            <span>Total Mes: <span id="totalHoras" class="text-green-600">0:00</span></span>
         </div>
-
     </main>
+
+    <!-- Modal Firma y PDF -->
+    <div id="modalPDF" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+            <h2 class="text-2xl font-bold text-center mb-4 text-blue-800">Cerrar Mes y Generar Informe Legal</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-bold mb-1">Firma de la Empresa:</label>
+                    <canvas id="firmaEmpresaCanvas" class="border-2 border-gray-300 rounded w-full h-32 bg-white"></canvas>
+                    <button onclick="limpiarFirma('empresa')" class="text-xs text-red-500 mt-1">Borrar firma</button>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Firma del Trabajador/a:</label>
+                    <canvas id="firmaTrabajadorCanvas" class="border-2 border-gray-300 rounded w-full h-32 bg-white"></canvas>
+                    <button onclick="limpiarFirma('trabajador')" class="text-xs text-red-500 mt-1">Borrar firma</button>
+                </div>
+            </div>
+
+            <div class="flex justify-between">
+                <button onclick="cerrarModalPDF()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
+                <button onclick="generarPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold shadow">
+                    <i class="fas fa-download mr-2"></i> Descargar PDF Firmado
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Script de Lógica -->
     <script>
@@ -110,22 +146,54 @@
         let fechaActual = new Date();
         let mesActual = fechaActual.getMonth();
         let anioActual = fechaActual.getFullYear();
-        let config = {};
+        let config = { jornadas: [] };
         let registros = {};
+        let firmaEmpresaPad, firmaTrabajadorPad;
 
-        // Inicialización al cargar
+        // Inicialización
         window.onload = () => {
             cargarConfig();
             cargarMes();
+            initFirmas();
         };
 
-        // --- FUNCIONES DE CONFIGURACIÓN ---
-        function toggleConfig() {
-            const panel = document.getElementById('configPanel');
-            panel.classList.toggle('hidden');
+        // --- CONFIGURACIÓN ---
+        function toggleConfig() { document.getElementById('configPanel').classList.toggle('hidden'); }
+
+        function addJornada(id = null, nombre = '', mIn = '', mOut = '', tIn = '', tOut = '', horasOrd = 0) {
+            const container = document.getElementById('jornadasContainer');
+            const div = document.createElement('div');
+            div.className = "grid grid-cols-7 gap-2 items-end bg-gray-50 p-2 rounded border";
+            div.id = `jornada_${id || Date.now()}`;
+            div.innerHTML = `
+                <input type="text" placeholder="Nombre (ej: L-J)" value="${nombre}" class="col-span-2 border p-1 rounded text-sm j-nombre">
+                <input type="time" value="${mIn}" class="border p-1 rounded text-sm j-mIn" title="Entrada M.">
+                <input type="time" value="${mOut}" class="border p-1 rounded text-sm j-mOut" title="Salida M.">
+                <input type="time" value="${tIn}" class="border p-1 rounded text-sm j-tIn" title="Entrada T.">
+                <input type="time" value="${tOut}" class="border p-1 rounded text-sm j-tOut" title="Salida T.">
+                <div class="flex gap-1">
+                    <input type="number" value="${horasOrd}" class="border p-1 rounded text-sm w-full j-horasOrd" title="H. Ordinarias teóricas">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 text-lg"><i class="fas fa-times-circle"></i></button>
+                </div>
+            `;
+            container.appendChild(div);
         }
 
         function guardarConfig() {
+            const jornadasDOM = document.querySelectorAll('#jornadasContainer > div');
+            let jornadasArr = [];
+            jornadasDOM.forEach(div => {
+                jornadasArr.push({
+                    id: div.id.split('_')[1],
+                    nombre: div.querySelector('.j-nombre').value,
+                    mIn: div.querySelector('.j-mIn').value,
+                    mOut: div.querySelector('.j-mOut').value,
+                    tIn: div.querySelector('.j-tIn').value,
+                    tOut: div.querySelector('.j-tOut').value,
+                    horasOrd: parseFloat(div.querySelector('.j-horasOrd').value) || 0
+                });
+            });
+
             config = {
                 empresa: document.getElementById('cfgEmpresa').value,
                 cif: document.getElementById('cfgCIF').value,
@@ -133,13 +201,11 @@
                 nombre: document.getElementById('cfgNombre').value,
                 nif: document.getElementById('cfgNIF').value,
                 naf: document.getElementById('cfgNAF').value,
-                mananaIn: document.getElementById('cfgMananaIn').value,
-                mananaOut: document.getElementById('cfgMananaOut').value,
-                tardeIn: document.getElementById('cfgTardeIn').value,
-                tardeOut: document.getElementById('cfgTardeOut').value
+                jornadas: jornadasArr
             };
             localStorage.setItem('jornadaConfig', JSON.stringify(config));
-            alert('Configuración guardada');
+            actualizarSelectJornadas();
+            alert('Configuración guardada correctamente');
             toggleConfig();
         }
 
@@ -153,18 +219,32 @@
                 document.getElementById('cfgNombre').value = config.nombre || '';
                 document.getElementById('cfgNIF').value = config.nif || '';
                 document.getElementById('cfgNAF').value = config.naf || '';
-                document.getElementById('cfgMananaIn').value = config.mananaIn || '';
-                document.getElementById('cfgMananaOut').value = config.mananaOut || '';
-                document.getElementById('cfgTardeIn').value = config.tardeIn || '';
-                document.getElementById('cfgTardeOut').value = config.tardeOut || '';
+                
+                document.getElementById('jornadasContainer').innerHTML = '';
+                if(config.jornadas) {
+                    config.jornadas.forEach(j => addJornada(j.id, j.nombre, j.mIn, j.mOut, j.tIn, j.tOut, j.horasOrd));
+                }
+            } else {
+                addJornada(); // Añadir una fila vacía por defecto
+            }
+            actualizarSelectJornadas();
+        }
+
+        function actualizarSelectJornadas() {
+            const select = document.getElementById('autoRellenoSelect');
+            select.innerHTML = '<option value="">Seleccionar jornada para auto-rellenar...</option>';
+            if(config.jornadas) {
+                config.jornadas.forEach(j => {
+                    if(j.nombre) select.innerHTML += `<option value="${j.id}">${j.nombre}</option>`;
+                });
             }
         }
 
-        // --- FUNCIONES DEL CALENDARIO Y REGISTROS ---
-        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        // --- CALENDARIO Y REGISTROS ---
+        const nombresMeses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
         function cambiarMes(delta) {
-            guardarRegistros(); // Guarda antes de irse
+            guardarRegistros();
             mesActual += delta;
             if (mesActual > 11) { mesActual = 0; anioActual++; }
             if (mesActual < 0) { mesActual = 11; anioActual--; }
@@ -177,7 +257,6 @@
             const savedData = localStorage.getItem(`jornada_${claveMes}`);
             registros = savedData ? JSON.parse(savedData) : {};
             renderTabla();
-            calcularTotal();
         }
 
         function renderTabla() {
@@ -189,52 +268,66 @@
                 const fechaIter = new Date(anioActual, mesActual, dia);
                 const diaSemana = fechaIter.getDay(); // 0=Dom, 6=Sab
                 const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
-                
-                // Cargar datos guardados o dejar vacío
                 const reg = registros[dia] || {};
 
                 const tr = document.createElement('tr');
                 tr.className = `border-b hover:bg-gray-50 ${esFinDeSemana ? 'bg-gray-50 text-gray-400' : ''}`;
                 
+                // Generar opciones de tipos de jornada en el desplegable diario
+                let opcionesJornada = '<option value="">-</option>';
+                if(config.jornadas) {
+                    config.jornadas.forEach(j => {
+                        if(j.nombre) opcionesJornada += `<option value="${j.id}" ${reg.tipoJornada === j.id ? 'selected' : ''}>${j.nombre}</option>`;
+                    });
+                }
+
                 tr.innerHTML = `
                     <td class="p-2 font-bold">${dia}</td>
-                    <td><input type="time" id="mIn_${dia}" value="${reg.mIn || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
-                    <td><input type="time" id="mOut_${dia}" value="${reg.mOut || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
-                    <td><input type="time" id="tIn_${dia}" value="${reg.tIn || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
-                    <td><input type="time" id="tOut_${dia}" value="${reg.tOut || ''}" class="w-full text-center border rounded p-1 focus:outline-none focus:border-blue-500" onchange="calcularTotal()"></td>
-                    <td class="font-bold p-2" id="horas_${dia}">0:00</td>
                     <td>
-                        <select id="obs_${dia}" class="w-full border rounded p-1 text-xs ${esFinDeSemana ? 'bg-gray-50' : ''}" onchange="manejarObservacion(${dia}, this.value)">
+                        <select id="tipo_${dia}" class="w-full border rounded p-1 text-xs bg-white" onchange="aplicarJornada(${dia}, this.value)">
+                            ${opcionesJornada}
+                        </select>
+                    </td>
+                    <td><input type="time" id="mIn_${dia}" value="${reg.mIn || ''}" class="w-full text-center border rounded p-1 focus:border-blue-500" onchange="calcularDia(${dia})"></td>
+                    <td><input type="time" id="mOut_${dia}" value="${reg.mOut || ''}" class="w-full text-center border rounded p-1 focus:border-blue-500" onchange="calcularDia(${dia})"></td>
+                    <td><input type="time" id="tIn_${dia}" value="${reg.tIn || ''}" class="w-full text-center border rounded p-1 focus:border-blue-500" onchange="calcularDia(${dia})"></td>
+                    <td><input type="time" id="tOut_${dia}" value="${reg.tOut || ''}" class="w-full text-center border rounded p-1 focus:border-blue-500" onchange="calcularDia(${dia})"></td>
+                    <td class="font-bold p-2 bg-blue-50" id="ord_${dia}">0:00</td>
+                    <td>
+                        <input type="number" id="ext_${dia}" value="${reg.ext || 0}" min="0" step="0.5" class="w-full text-center border rounded p-1 bg-red-50 focus:border-red-500" onchange="calcularDia(${dia})" title="Horas extras o guardias">
+                    </td>
+                    <td>
+                        <select id="obs_${dia}" class="w-full border rounded p-1 text-xs bg-white" onchange="manejarObservacion(${dia}, this.value)">
                             <option value="">Normal</option>
                             <option value="Festivo" ${reg.obs === 'Festivo' ? 'selected' : ''}>Festivo</option>
                             <option value="Vacaciones" ${reg.obs === 'Vacaciones' ? 'selected' : ''}>Vacaciones</option>
-                            <option value="Baja" ${reg.obs === 'Baja' ? 'selected' : ''}>Baja Médica</option>
+                            <option value="Baja" ${reg.obs === 'Baja' ? 'selected' : ''}>Baja</option>
                             <option value="Permiso" ${reg.obs === 'Permiso' ? 'selected' : ''}>Permiso</option>
                         </select>
                     </td>
                 `;
                 tbody.appendChild(tr);
-                // Calcular horas del día recién añadido
-                calcularHorasDia(dia);
+                calcularDia(dia); // Cálculo inicial
             }
+            calcularTotalesMes();
         }
 
-        function manejarObservacion(dia, valor) {
-            if (valor !== "") {
-                // Si marca festivo, vacaciones, etc., limpiamos las horas
-                document.getElementById(`mIn_${dia}`).value = '';
-                document.getElementById(`mOut_${dia}`).value = '';
-                document.getElementById(`tIn_${dia}`).value = '';
-                document.getElementById(`tOut_${dia}`).value = '';
+        function aplicarJornada(dia, jornadaId) {
+            if(!jornadaId) return;
+            const jornada = config.jornadas.find(j => j.id == jornadaId);
+            if(jornada) {
+                document.getElementById(`mIn_${dia}`).value = jornada.mIn;
+                document.getElementById(`mOut_${dia}`).value = jornada.mOut;
+                document.getElementById(`tIn_${dia}`).value = jornada.tIn;
+                document.getElementById(`tOut_${dia}`).value = jornada.tOut;
+                calcularDia(dia);
             }
-            calcularTotal();
         }
 
         function autoRellenar() {
-            if (!config.mananaIn) {
-                alert("Configura primero tu Jornada Tipo en el panel de configuración.");
-                return;
-            }
+            const jornadaId = document.getElementById('autoRellenoSelect').value;
+            if(!jornadaId) { alert("Selecciona un tipo de jornada primero."); return; }
+            
             const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
             for (let dia = 1; dia <= diasEnMes; dia++) {
                 const fechaIter = new Date(anioActual, mesActual, dia);
@@ -242,57 +335,87 @@
                 const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
                 const obs = document.getElementById(`obs_${dia}`).value;
                 
-                // Solo rellena si es laborable, no tiene observación especial y está vacío
-                if (!esFinDeSemana && obs === "" && !document.getElementById(`mIn_${dia}`).value) {
-                    document.getElementById(`mIn_${dia}`).value = config.mananaIn;
-                    document.getElementById(`mOut_${dia}`).value = config.mananaOut;
-                    document.getElementById(`tIn_${dia}`).value = config.tardeIn;
-                    document.getElementById(`tOut_${dia}`).value = config.tardeOut;
+                if (!esFinDeSemana && obs === "") {
+                    document.getElementById(`tipo_${dia}`).value = jornadaId;
+                    aplicarJornada(dia, jornadaId);
                 }
             }
-            calcularTotal();
+        }
+
+        function manejarObservacion(dia, valor) {
+            if (valor !== "") {
+                document.getElementById(`mIn_${dia}`).value = '';
+                document.getElementById(`mOut_${dia}`).value = '';
+                document.getElementById(`tIn_${dia}`).value = '';
+                document.getElementById(`tOut_${dia}`).value = '';
+                document.getElementById(`ext_${dia}`).value = 0;
+                document.getElementById(`tipo_${dia}`).value = '';
+                calcularDia(dia);
+            }
         }
 
         // --- CÁLCULOS DE HORAS ---
-        function calcularHorasDia(dia) {
-            const mIn = document.getElementById(`mIn_${dia}`).value;
-            const mOut = document.getElementById(`mOut_${dia}`).value;
-            const tIn = document.getElementById(`tIn_${dia}`).value;
-            const tOut = document.getElementById(`tOut_${dia}`).value;
-            const obs = document.getElementById(`obs_${dia}`).value;
-
-            let totalMinutos = 0;
-
-            if (mIn && mOut) totalMinutos += tiempoEntre(mIn, mOut);
-            if (tIn && tOut) totalMinutos += tiempoEntre(tIn, tOut);
-
-            // Si es Festivo, podríamos computar las horas pero en tu Excel aparecen como 8 o 5 fijos.
-            // Por ahora, si hay horas sumamos, si no hay horas y es Vacaciones/Festivo, sumamos 0 (luego ajustaremos en Fase 2).
-            
-            const horas = Math.floor(totalMinutos / 60);
-            const minutos = totalMinutos % 60;
-            
-            document.getElementById(`horas_${dia}`).innerText = totalMinutos > 0 ? `${horas}:${minutos.toString().padStart(2, '0')}` : '0:00';
-        }
-
         function tiempoEntre(inicio, fin) {
+            if(!inicio || !fin) return 0;
             const [hIn, mIn] = inicio.split(':').map(Number);
             const [hOut, mOut] = fin.split(':').map(Number);
             return (hOut * 60 + mOut) - (hIn * 60 + mIn);
         }
 
-        function calcularTotal() {
+        function calcularDia(dia) {
+            const mIn = document.getElementById(`mIn_${dia}`).value;
+            const mOut = document.getElementById(`mOut_${dia}`).value;
+            const tIn = document.getElementById(`tIn_${dia}`).value;
+            const tOut = document.getElementById(`tOut_${dia}`).value;
+            const extInput = parseFloat(document.getElementById(`ext_${dia}`).value) || 0;
+            
+            let totalMinutosTrabajados = tiempoEntre(mIn, mOut) + tiempoEntre(tIn, tOut);
+            let minutosExtrasManuales = extInput * 60; // Convierte horas decimales a min
+            
+            // Determinar ordinarias vs extras (Si trabaja más de 8h, el exceso es extra automático)
+            let minutosOrdinarios = Math.min(totalMinutosTrabajados, 480); // Max 8h (480 min) ordinarias
+            let minutosExtrasAutomaticos = Math.max(totalMinutosTrabajados - 480, 0);
+            
+            let totalOrdinarias = minutosOrdinarios;
+            let totalExtras = minutosExtrasManuales + minutosExtrasAutomaticos;
+
+            document.getElementById(`ord_${dia}`).innerText = formatMinutos(totalOrdinarias);
+            
+            calcularTotalesMes();
+        }
+
+        function formatMinutos(minutos) {
+            if(minutos <= 0) return "0:00";
+            const h = Math.floor(minutos / 60);
+            const m = minutos % 60;
+            return `${h}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function calcularTotalesMes() {
             const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
-            let totalMinutos = 0;
+            let totalOrdMin = 0, totalExtMin = 0;
+
             for (let dia = 1; dia <= diasEnMes; dia++) {
-                calcularHorasDia(dia);
-                const textoHoras = document.getElementById(`horas_${dia}`).innerText;
-                const [h, m] = textoHoras.split(':').map(Number);
-                totalMinutos += (h * 60) + m;
+                // Ordinarias
+                const textOrd = document.getElementById(`ord_${dia}`).innerText;
+                const [hO, mO] = textOrd.split(':').map(Number);
+                totalOrdMin += (hO * 60) + (mO||0);
+
+                // Extras
+                const extVal = parseFloat(document.getElementById(`ext_${dia}`).value) || 0;
+                const mIn = document.getElementById(`mIn_${dia}`).value;
+                const mOut = document.getElementById(`mOut_${dia}`).value;
+                const tIn = document.getElementById(`tIn_${dia}`).value;
+                const tOut = document.getElementById(`tOut_${dia}`).value;
+                let trabajado = tiempoEntre(mIn, mOut) + tiempoEntre(tIn, tOut);
+                let autoExt = Math.max(trabajado - 480, 0);
+                
+                totalExtMin += (extVal * 60) + autoExt;
             }
-            const totalH = Math.floor(totalMinutos / 60);
-            const totalM = totalMinutos % 60;
-            document.getElementById('totalHoras').innerText = `${totalH}:${totalM.toString().padStart(2, '0')}`;
+
+            document.getElementById('totalOrd').innerText = formatMinutos(totalOrdMin);
+            document.getElementById('totalExt').innerText = formatMinutos(totalExtMin);
+            document.getElementById('totalHoras').innerText = formatMinutos(totalOrdMin + totalExtMin);
         }
 
         // --- GUARDADO ---
@@ -303,19 +426,141 @@
 
             for (let dia = 1; dia <= diasEnMes; dia++) {
                 dataParaGuardar[dia] = {
+                    tipoJornada: document.getElementById(`tipo_${dia}`).value,
                     mIn: document.getElementById(`mIn_${dia}`).value,
                     mOut: document.getElementById(`mOut_${dia}`).value,
                     tIn: document.getElementById(`tIn_${dia}`).value,
                     tOut: document.getElementById(`tOut_${dia}`).value,
+                    ext: document.getElementById(`ext_${dia}`).value,
                     obs: document.getElementById(`obs_${dia}`).value
                 };
             }
             localStorage.setItem(`jornada_${claveMes}`, JSON.stringify(dataParaGuardar));
         }
-        
-        // Guardar automáticamente al cambiar de pestaña o cerrar
         window.addEventListener('beforeunload', guardarRegistros);
 
+        // --- FIRMAS Y PDF ---
+        function initFirmas() {
+            const canvasE = document.getElementById('firmaEmpresaCanvas');
+            const canvasT = document.getElementById('firmaTrabajadorCanvas');
+            firmaEmpresaPad = new SignaturePad(canvasE);
+            firmaTrabajadorPad = new SignaturePad(canvasT);
+            
+            // Ajustar tamaño canvas
+            window.addEventListener("resize", () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                [canvasE, canvasT].forEach(c => {
+                    c.width = c.offsetWidth * ratio;
+                    c.height = c.offsetHeight * ratio;
+                    c.getContext("2d").scale(ratio, ratio);
+                });
+                firmaEmpresaPad.clear(); firmaTrabajadorPad.clear();
+            });
+        }
+
+        function limpiarFirma(tipo) {
+            if(tipo === 'empresa') firmaEmpresaPad.clear();
+            else firmaTrabajadorPad.clear();
+        }
+
+        function abrirModalPDF() {
+            guardarRegistros();
+            document.getElementById('modalPDF').classList.remove('hidden');
+            window.dispatchEvent(new Event('resize')); // Ajustar canvas
+        }
+
+        function cerrarModalPDF() {
+            document.getElementById('modalPDF').classList.add('hidden');
+        }
+
+        function generarPDF() {
+            if(firmaEmpresaPad.isEmpty() || firmaTrabajadorPad.isEmpty()) {
+                alert("Ambas firmas son necesarias para el informe legal.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'mm', 'a4'); // Horizontal
+            
+            // Cabecera
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text("REGISTRO DIARIO DE JORNADA:", 14, 15);
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'normal');
+            doc.text("En cumplimiento de la obligación establecida en el artículo 34.9 del Estatuto de los Trabajadores", 14, 20);
+
+            // Datos Empresa/Trabajador
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text("EMPRESA:", 14, 28); doc.setFont(undefined, 'normal'); doc.text(config.empresa, 35, 28);
+            doc.setFont(undefined, 'bold'); doc.text("C.I.F:", 150, 28); doc.setFont(undefined, 'normal'); doc.text(config.cif, 162, 28);
+            doc.setFont(undefined, 'bold'); doc.text("MES:", 230, 28); doc.setFont(undefined, 'normal'); doc.text(nombresMeses[mesActual], 242, 28);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text("TRABAJADOR/A:", 14, 34); doc.setFont(undefined, 'normal'); doc.text(config.nombre, 42, 34);
+            doc.setFont(undefined, 'bold'); doc.text("N.I.F:", 150, 34); doc.setFont(undefined, 'normal'); doc.text(config.nif, 162, 34);
+            doc.setFont(undefined, 'bold'); doc.text("AÑO:", 230, 34); doc.setFont(undefined, 'normal'); doc.text(anioActual.toString(), 242, 34);
+
+            // Tabla
+            const diasEnMes = new Date(anioActual, mesActual + 1, 0).getDate();
+            let body = [];
+
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const reg = registros[dia] || {};
+                const obs = document.getElementById(`obs_${dia}`).value;
+                const extVal = parseFloat(document.getElementById(`ext_${dia}`).value) || 0;
+                const mIn = document.getElementById(`mIn_${dia}`).value;
+                const mOut = document.getElementById(`mOut_${dia}`).value;
+                const tIn = document.getElementById(`tIn_${dia}`).value;
+                const tOut = document.getElementById(`tOut_${dia}`).value;
+                
+                let trabajado = tiempoEntre(mIn, mOut) + tiempoEntre(tIn, tOut);
+                let ordinarias = Math.min(trabajado, 480);
+                let extras = (extVal * 60) + Math.max(trabajado - 480, 0);
+
+                body.push([
+                    dia,
+                  //  document.getElementById(`tipo_${dia}`).value ? config.jornadas.find(j=>j.id == document.getElementById(`tipo_${dia}`).value)?.nombre || '' : '',
+                    mIn || '-', mOut || '-', tIn || '-', tOut || '-',
+                    formatMinutos(ordinarias),
+                    formatMinutos(extras),
+                    obs
+                ]);
+            }
+
+            // Añadir fila de totales
+            const textTotalOrd = document.getElementById('totalOrd').innerText;
+            const textTotalExt = document.getElementById('totalExt').innerText;
+            body.push([{content: 'Total Horas Mes', colSpan: 6, styles: {halign: 'right', fontStyle: 'bold'}}, textTotalOrd, textTotalExt, '']);
+
+            doc.autoTable({
+                startY: 40,
+                head: [['DÍA', 'H. ENTRADA M.', 'H. SALIDA M.', 'H. ENTRADA T.', 'H. SALIDA T.', 'H. ORDINARIAS', 'H. EXTRAORD.', 'OBSERVACIONES']],
+                body: body,
+                styles: { fontSize: 8, cellPadding: 1.5, halign: 'center' },
+                headStyles: { fillColor: [30, 58, 138], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [240, 240, 240] },
+                margin: { left: 14, right: 14 }
+            });
+
+            // Firmas
+            const finalY = doc.lastAutoTable.finalY + 10;
+            
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text("Fdo. La Empresa", 50, finalY);
+            doc.text("Fdo. Trabajador/a", 200, finalY);
+
+            const firmaE = firmaEmpresaPad.toDataURL('image/png');
+            const firmaT = firmaTrabajadorPad.toDataURL('image/png');
+            
+            doc.addImage(firmaE, 'PNG', 30, finalY + 2, 50, 20);
+            doc.addImage(firmaT, 'PNG', 180, finalY + 2, 50, 20);
+
+            doc.save(`Registro_Jornada_${nombresMeses[mesActual]}_${anioActual}.pdf`);
+            cerrarModalPDF();
+        }
     </script>
 </body>
 </html>
